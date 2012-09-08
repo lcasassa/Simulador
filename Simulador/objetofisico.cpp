@@ -4,7 +4,7 @@ ObjetoFisico::ObjetoFisico()
 {
 }
 
-void ObjetoFisico::pintar(QPainter &p) {
+void ObjetoFisico::pintar(QPainter *p) {
 
 }
 

@@ -12,12 +12,14 @@ class Ode : public QThread
     Q_OBJECT
 public:
     explicit Ode(Simulador *simulador_, QObject *parent = 0);
+    void stopOde();
 
 protected:
     void run();
 
 private:
     Simulador *simulador;
+    int running;
 
 signals:
     

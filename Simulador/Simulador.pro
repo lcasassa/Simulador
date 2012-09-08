@@ -15,17 +15,22 @@ SOURCES += main.cpp\
     simulador.cpp \
     objetofisico.cpp \
     ode.cpp \
-    objetocircunferencia.cpp
+    objetocircunferencia.cpp \
+    objetolinea.cpp \
+    robotquadrotor.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
     objetofisico.h \
     ode.h \
-    objetocircunferencia.h
+    objetocircunferencia.h \
+    objetolinea.h \
+    robotquadrotor.h
 
 FORMS    += mainwindow.ui
 
 unix {
     CONFIG += link_pkgconfig
     PKGCONFIG += ode
+    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
 }

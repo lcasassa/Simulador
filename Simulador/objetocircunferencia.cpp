@@ -21,7 +21,7 @@ void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
 }
 
 
-void ObjetoCircunferencia::pintar(QPainter &p) {
+void ObjetoCircunferencia::pintar(QPainter *p) {
     const dReal *pos;
     const dReal *R;
 
@@ -30,5 +30,7 @@ void ObjetoCircunferencia::pintar(QPainter &p) {
     R = dGeomGetRotation (geom);
     mutex.unlock();
 
-    p.drawEllipse(pos[0],pos[2],radio,radio);
+    p->drawEllipse(QPointF((qreal)pos[0],(qreal)pos[1]), (qreal)radio, (qreal)radio);
+//    p->drawEllipse(0,0,5,5);
+//    qWarning("pos: %d", pos[2]);
 }

@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QThread>
 #include <QList>
+#include <QScopedPointer>
 
 #include "ode.h"
 #include "objetofisico.h"
@@ -15,12 +16,16 @@ public:
     explicit Simulador(QWidget *parent = 0);
     void registrarObjeto(ObjetoFisico *objetoFisico);
     QList<ObjetoFisico*> listaObjetoFisico;
-    
+    void start();
+    void stop();
+    bool startStop();
+
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     Ode *ode;
+    QTimer *timer;
 
 signals:
     

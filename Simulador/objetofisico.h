@@ -9,8 +9,8 @@ class ObjetoFisico
 {
 public:
     ObjetoFisico();
-    virtual void pintar(QPainter &p);
     virtual void init(dWorldID *world, dSpaceID *space);
+    virtual void pintar(QPainter *p);
     QMutex mutex;
 };
 

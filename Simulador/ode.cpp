@@ -4,6 +4,7 @@
 #include "ode.h"
 #include "simulador.h"
 #include "objetocircunferencia.h"
+#include "objetolinea.h"
 
 // dynamics and collision objects
 static dWorldID world;
@@ -14,23 +15,38 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     QThread(parent)
 {
     simulador = simulador_;
+    simulador->registrarObjeto(new ObjetoCircunferencia());
+/*
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
 
-    ObjetoCircunferencia oc;
-    simulador->registrarObjeto(&oc);
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-4, 4), QPointF( 4, 4.5)));
+    simulador->registrarObjeto(new ObjetoLinea(QPointF( 4, 4), QPointF( 4,-4.5)));
+    simulador->registrarObjeto(new ObjetoLinea(QPointF( 4,-4), QPointF(-4,-4.5)));
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-4,-4), QPointF(-4, 4.5)));
+ */
+    qreal ancho=0.1, largo=4.5;
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho))); // arriba
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
 }
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2);
 
+void Ode::stopOde() {
+    running = 0;
+}
+
 void Ode::run() {
 
+    running = 1;
 
     dInitODE ();
     // create world
     world = dWorldCreate ();
     space = dHashSpaceCreate (0);
-    dWorldSetGravity (world,0,0,-9.8);
+    dWorldSetGravity (world,-0.2,-9.8,0);
     dWorldSetCFM (world,1e-5);
-    dCreatePlane (space,0,0,1,0);
     contactgroup = dJointGroupCreate (0);
 
     //loop objeto fisico
@@ -41,8 +57,7 @@ void Ode::run() {
 
     // run simulation
 //    dsSimulationLoop (0,0,352,288,0);
-
-    while(1) {
+    while(running) {
         // find collisions and add contact joints
         dSpaceCollide (space,0,&nearCallback);
         // step the simulation
@@ -62,6 +77,7 @@ void Ode::run() {
 //          qWarning() << (float)pos[0] << (float)pos[1] << (float)pos[2];
         //    dsDrawSphere (pos,R,dGeomSphereGetRadius (geom));
         this->msleep(10);
+
     }
 
     // clean up
@@ -69,7 +85,7 @@ void Ode::run() {
     dSpaceDestroy (space);
     dWorldDestroy (world);
     dCloseODE();
-    exec();
+//    exec();
 }
 
 static void nearCallback (void *data, dGeomID o1, dGeomID o2)

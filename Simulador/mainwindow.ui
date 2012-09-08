@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>524</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,7 +16,20 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="Simulador" name="simuladorWidget" native="true"/>
+     <widget class="Simulador" name="simuladorWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>500</width>
+        <height>500</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -25,10 +38,17 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>524</width>
      <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuSimulacion">
+    <property name="title">
+     <string>Simulacion</string>
+    </property>
+    <addaction name="actionStart_Stop"/>
+   </widget>
+   <addaction name="menuSimulacion"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -39,6 +59,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionStart_Stop">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
