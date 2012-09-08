@@ -11,8 +11,9 @@ public:
     ObjetoCircunferencia(float radio_ = 0.5, float masa_ = 1.0, int posicionInicialX_ = 0, int posicionInicialY_ = 0, int posicionInicialZ_ = 0);
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
-private:
     dBodyID body;
+
+private:
     dGeomID geom;
     dMass m;
     float radio;

@@ -5,6 +5,7 @@
 #include "simulador.h"
 #include "objetocircunferencia.h"
 #include "objetolinea.h"
+#include "robotquadrotor.h"
 
 // dynamics and collision objects
 static dWorldID world;
@@ -16,6 +17,7 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 {
     simulador = simulador_;
     simulador->registrarObjeto(new ObjetoCircunferencia());
+    simulador->registrarObjeto(new RobotQuadrotor());
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
 
@@ -45,7 +47,7 @@ void Ode::run() {
     // create world
     world = dWorldCreate ();
     space = dHashSpaceCreate (0);
-    dWorldSetGravity (world,-0.2,-9.8,0);
+//    dWorldSetGravity (world,-0.2,-9.8,0);
     dWorldSetCFM (world,1e-5);
     contactgroup = dJointGroupCreate (0);
 
@@ -60,6 +62,11 @@ void Ode::run() {
     while(running) {
         // find collisions and add contact joints
         dSpaceCollide (space,0,&nearCallback);
+
+        for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
+            simulador->listaObjetoFisico[i]->odeLoop();
+        }
+
         // step the simulation
         dWorldQuickStep (world,0.01);
         // remove all contact joints
