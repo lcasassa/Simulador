@@ -3,9 +3,12 @@
 
 RobotQuadrotor::RobotQuadrotor()
 {
-    for(int i=0; i<4; i++) {
-        objetoCircunferencia[i] = new ObjetoCircunferencia();
-    }
+    int i=0;
+    objetoCircunferencia[i++] = new ObjetoCircunferencia(0.5,0.3,1,  0.5, 0.5);
+    objetoCircunferencia[i++] = new ObjetoCircunferencia(0.5,0.3,1, -0.5, 0.5);
+    objetoCircunferencia[i++] = new ObjetoCircunferencia(0.5,0.3,1,  0.5,-0.5);
+    objetoCircunferencia[i++] = new ObjetoCircunferencia(0.5,0.3,1, -0.5,-0.5);
+
 }
 
 void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
@@ -15,7 +18,12 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
 }
 
 void RobotQuadrotor::odeLoop() {
-    dBodyAddRelForce (objetoCircunferencia[0]->body, 1, 1, 0);
+    for(int i=0; i<4; i++) {
+        objetoCircunferencia[i]->odeLoop();
+    }
+    // Roce
+    dBodyAddRelForce (objetoCircunferencia[0]->body, 1, 0.5, 0);
+    dBodyAddTorque (objetoCircunferencia[0]->body, 0, 0, 0.2);
 }
 
 void RobotQuadrotor::pintar(QPainter *p) {

@@ -8,9 +8,10 @@
 class ObjetoCircunferencia : public ObjetoFisico
 {
 public:
-    ObjetoCircunferencia(float radio_ = 0.5, float masa_ = 1.0, int posicionInicialX_ = 0, int posicionInicialY_ = 0, int posicionInicialZ_ = 0);
+    ObjetoCircunferencia(float radio_ = 0.5, float masa_ = 1.0, float roce_ = 0.1, float posicionInicialX_ = 0.0, float posicionInicialY_ = 0.0, float posicionInicialZ_ = 0.0);
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
+    void odeLoop();
     dBodyID body;
 
 private:
@@ -18,9 +19,10 @@ private:
     dMass m;
     float radio;
     float masa;
-    int posicionInicialX;
-    int posicionInicialY;
-    int posicionInicialZ;
+    float roce;
+    float posicionInicialX;
+    float posicionInicialY;
+    float posicionInicialZ;
 };
 
 #endif // OBJETOCIRCUNFERENCIA_H
