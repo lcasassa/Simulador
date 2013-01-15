@@ -14,17 +14,18 @@ class Simulador : public QWidget
     Q_OBJECT
 public:
     explicit Simulador(QWidget *parent = 0);
+    ~Simulador();
     void registrarObjeto(ObjetoFisico *objetoFisico);
     QList<ObjetoFisico*> listaObjetoFisico;
     void start();
     void stop();
     bool startStop();
+    Ode *ode;
 
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
-    Ode *ode;
     QTimer *timer;
 
 signals:

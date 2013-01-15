@@ -9,7 +9,13 @@ Simulador::Simulador(QWidget *parent) :
 
     timer = new QTimer();
     connect(timer, SIGNAL(timeout()),this, SLOT(timeout()));
-    timer->setInterval(20);
+    timer->setInterval(1/0.1);
+}
+
+Simulador::~Simulador() {
+    stop();
+    delete ode;
+    delete timer;
 }
 
 void Simulador::timeout() {
@@ -45,12 +51,15 @@ void Simulador::stop() {
 
 void Simulador::paintEvent(QPaintEvent *) {
     QPainter p;
+    float radio;
 
     if(!timer->isActive()) return;
 
+    radio = (this->width()/this->height()) < 1 ? this->width() : this->height();
+
     p.begin(this);
-    p.translate(this->width()/2,this->height()/2);
-    p.scale(this->width()/10.0,this->height()/-10.0);
+    p.translate(radio/2,radio/2);
+    p.scale(radio/10.0,radio/-10.0);
 //    p.scale(10000.0/(1000.0 * (this->height() < 600 ? this->height() : 600)), 10000.0/(1000.0 * (this->width() < 600 ? this->width() : 600)) * -1);
     for (int i = 0; i < listaObjetoFisico.size(); ++i) {
         listaObjetoFisico[i]->pintar(&p);

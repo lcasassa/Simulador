@@ -18,7 +18,9 @@ void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
     dBodySetMass (body,&m);
     dGeomSetBody (geom,body);
     // set initial position
-    dBodySetPosition (body,posicionInicialX, posicionInicialY, posicionInicialZ);
+    dBodySetPosition (body,posicionInicialX, posicionInicialY, 0);
+    //posicionInicialZ
+    //dBodySetRotation(body, );
 }
 
 
@@ -34,6 +36,12 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
     // circulo
     p->drawEllipse(QPointF((qreal)pos[0],(qreal)pos[1]), (qreal)radio, (qreal)radio);
 
+    QPen backup_pen = p->pen();
+    QPen pen;
+    pen.setWidthF(0.02);
+    pen.setColor(Qt::black);
+    p->setPen(pen);
+
     // lina marca el norte
     dVector3 t1,t2;
     t1[0] = radio*1.2;
@@ -43,10 +51,15 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
     dMULTIPLY0_331 (t2,R,t1);
 
     p->drawLine(QPointF(pos[0], pos[1]), QPointF(pos[0] + t2[0], pos[1] + t2[1]));
+
+    p->setPen(backup_pen);
 }
 
 void ObjetoCircunferencia::odeLoop() {
     const dReal *v,*w;
+    static int i=0;
+
+    dBodyAddForce (body, sin((float)(i++%(2*3141))/1000.0)*0.3, cos((float)(i++%(2*3141))/1000.0)*0.1, 0);
     // Roce
     v = dBodyGetLinearVel(body);
     w = dBodyGetAngularVel(body);

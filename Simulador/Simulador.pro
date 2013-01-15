@@ -17,7 +17,10 @@ SOURCES += main.cpp\
     ode.cpp \
     objetocircunferencia.cpp \
     objetolinea.cpp \
-    robotquadrotor.cpp
+    robotquadrotor.cpp \
+    sensorinfrarrojo.cpp \
+    controlfuzzy.cpp \
+    control.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -25,12 +28,21 @@ HEADERS  += mainwindow.h \
     ode.h \
     objetocircunferencia.h \
     objetolinea.h \
-    robotquadrotor.h
+    robotquadrotor.h \
+    sensorinfrarrojo.h \
+    controlfuzzy.h \
+    control.h
 
 FORMS    += mainwindow.ui
 
-unix {
-    CONFIG += link_pkgconfig
-    PKGCONFIG += ode
-    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
+#unix {
+#    CONFIG += link_pkgconfig
+#    PKGCONFIG += ode
+#    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
+#}
+
+unix: mac: {
+    DEFINES += dSINGLE
+    LIBS += -L/usr/local/Cellar/ode/0.12/lib -lode
+    INCLUDEPATH += /usr/local/Cellar/ode/0.12/include/
 }

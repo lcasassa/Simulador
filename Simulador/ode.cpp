@@ -1,23 +1,30 @@
 #include <QtDebug>
-#include <ode/ode.h>
+//#include <ode/ode.h>
 
 #include "ode.h"
 #include "simulador.h"
 #include "objetocircunferencia.h"
 #include "objetolinea.h"
 #include "robotquadrotor.h"
+#include "sensorinfrarrojo.h"
 
 // dynamics and collision objects
 static dWorldID world;
 static dSpaceID space;
 static dJointGroupID contactgroup;
 
+Simulador *sim;
+
 Ode::Ode(Simulador *simulador_, QObject *parent) :
     QThread(parent)
 {
     simulador = simulador_;
-    simulador->registrarObjeto(new ObjetoCircunferencia());
+    sim = simulador;
+    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0, 2));
+    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 2, 2));
+    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0,-2));
     simulador->registrarObjeto(new RobotQuadrotor());
+
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
 
@@ -31,9 +38,13 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
     simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
-}
 
-static void nearCallback (void *data, dGeomID o1, dGeomID o2);
+
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
+
+//    simulador->registrarObjeto(new SensorInfrarrojo());
+    sleepTime = 1000;
+}
 
 void Ode::stopOde() {
     running = 0;
@@ -42,6 +53,10 @@ void Ode::stopOde() {
 void Ode::run() {
 
     running = 1;
+
+    for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
+        simulador->listaObjetoFisico[i]->lock();
+    }
 
     dInitODE ();
     // create world
@@ -74,16 +89,16 @@ void Ode::run() {
         // redraw sphere at new location
 
         for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
-            simulador->listaObjetoFisico[i]->mutex.lock();
+            simulador->listaObjetoFisico[i]->unlock();
         }
         for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
-            simulador->listaObjetoFisico[i]->mutex.unlock();
+            simulador->listaObjetoFisico[i]->lock();
         }
 
 //        if(i++%10==0)
 //          qWarning() << (float)pos[0] << (float)pos[1] << (float)pos[2];
         //    dsDrawSphere (pos,R,dGeomSphereGetRadius (geom));
-        this->msleep(10);
+        this->usleep(sleepTime);
 
     }
 
@@ -95,10 +110,17 @@ void Ode::run() {
 //    exec();
 }
 
-static void nearCallback (void *data, dGeomID o1, dGeomID o2)
+void Ode::nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
+    for (int i = 0; i < sim->listaObjetoFisico.size(); ++i) {
+        if(sim->listaObjetoFisico[i]->odeCollide(o1, o2)) return;
+    }
+
     dBodyID b1 = dGeomGetBody(o1);
     dBodyID b2 = dGeomGetBody(o2);
+
+//    if(b1 == 0 || b2 == 0) return;
+
     dContact contact;
     contact.surface.mode = dContactBounce | dContactSoftCFM;
     // friction parameter
@@ -113,4 +135,5 @@ static void nearCallback (void *data, dGeomID o1, dGeomID o2)
         dJointID c = dJointCreateContact (world,contactgroup,&contact);
         dJointAttach (c,b1,b2);
     }
+
 }

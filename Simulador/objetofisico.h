@@ -11,7 +11,10 @@ public:
     ObjetoFisico();
     virtual void init(dWorldID *world, dSpaceID *space);
     virtual void odeLoop();
+    virtual bool odeCollide(dGeomID o1, dGeomID o2);
     virtual void pintar(QPainter *p);
+    virtual void lock();
+    virtual void unlock();
     QMutex mutex;
 };
 
