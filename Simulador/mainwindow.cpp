@@ -53,6 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
+
+    ui->simuladorWidget->setControl(ui->widget_fuzzyfication);
 }
 
 MainWindow::~MainWindow()

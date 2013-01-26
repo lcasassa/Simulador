@@ -17,6 +17,8 @@ RobotQuadrotor::RobotQuadrotor()
     objetoCircunferencia[2] = new ObjetoCircunferencia(0.5,0.3,1,  0.5,-0.5);
     objetoCircunferencia[3] = new ObjetoCircunferencia(0.5,0.3,1, -0.5,-0.5);
 */
+    control = NULL;
+
     radio = 0.3;
     masa = 1;
 
@@ -24,8 +26,13 @@ RobotQuadrotor::RobotQuadrotor()
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j] = new SensorInfrarrojo(radio*5);
 
-    control = new ControlFuzzy();
+//    control = new ControlFuzzy();
 
+}
+
+void RobotQuadrotor::setControl(Control *control_) {
+    control = control_;
+    qWarning("set control");
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -39,7 +46,6 @@ RobotQuadrotor::~RobotQuadrotor() {
         for(int j=0; j<4; j++)
             delete sensorInfrarrojo[i][j];
 
-    delete control;
 }
 
 void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
@@ -123,10 +129,11 @@ void RobotQuadrotor::odeLoop() {
     if(key_anticlock)
         dBodyAddTorque (body,  0.0, 0.0,  0.1);
 
-    dReal salidas[3];
-    dReal distanciaDetectado[3];
+    qreal salidas[3];
+    qreal distanciaDetectado[3];
     distanciaDetectado[0] = sensorInfrarrojo[0][0]->distanciaDetectado;
-    control->loopControl(distanciaDetectado, salidas);
+    if(control != NULL)
+        control->loopControl(distanciaDetectado, salidas);
     dBodyAddRelForce (body,  0.1*salidas[0],  0.0, 0);
 
     // Roce
@@ -196,6 +203,7 @@ void RobotQuadrotor::pintar(QPainter *p) {
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j]->pintar(p);
+
 }
 
 void RobotQuadrotor::lock() {

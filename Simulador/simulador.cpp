@@ -5,11 +5,19 @@
 Simulador::Simulador(QWidget *parent) :
     QWidget(parent)
 {
+    control = NULL;
+
     ode = new Ode(this);
 
     timer = new QTimer();
     connect(timer, SIGNAL(timeout()),this, SLOT(timeout()));
     timer->setInterval(1/0.1);
+
+}
+
+void Simulador::setControl(Control *control_) {
+    control = control_;
+    ode->setControl(control_);
 }
 
 Simulador::~Simulador() {
@@ -20,6 +28,8 @@ Simulador::~Simulador() {
 
 void Simulador::timeout() {
     this->repaint();
+    if(control != NULL)
+        control->repaint();
 }
 
 void Simulador::registrarObjeto(ObjetoFisico *objetoFisico) {

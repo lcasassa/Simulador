@@ -23,7 +23,8 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0, 2));
     simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 2, 2));
     simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0,-2));
-    simulador->registrarObjeto(new RobotQuadrotor());
+    robotQuadrotor = new RobotQuadrotor();
+    simulador->registrarObjeto(robotQuadrotor);
 
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
@@ -44,6 +45,10 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 
 //    simulador->registrarObjeto(new SensorInfrarrojo());
     sleepTime = 1000;
+}
+
+void Ode::setControl(Control *control) {
+    robotQuadrotor->setControl(control);
 }
 
 void Ode::stopOde() {

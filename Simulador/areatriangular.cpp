@@ -1,35 +1,50 @@
 #include "areatriangular.h"
+#include <QDebug>
+
+int AreaTriangular::id_count = 0;
 
 AreaTriangular::AreaTriangular(QObject *parent) :
     QObject(parent)
 {
+    id = id_count++;
 }
-
 
 AreaTriangular::~AreaTriangular() {
 
 }
 
-void AreaTriangular::setTriangulo(dReal base1X, dReal base2X, dReal puntaX, dReal puntaY) {
-    base1[0] = base1X; // .2
-    base1[1] = 0.0;
-    base2[0] = base2X; // .8
-    base2[1] = 0.0;
-    punta[0] = puntaX; // .5
-    punta[1] = puntaY; // 1
+void AreaTriangular::setTriangulo(QString nombre_, qreal base1_, qreal base2_) {
+    setTriangulo(nombre_, base1_, base2_, QPointF((base1_ + base2_)/2, 1));
+}
+
+void AreaTriangular::setTriangulo(QString nombre_, qreal base1_, qreal base2_, qreal punta_) {
+    setTriangulo(nombre_, base1_, base2_, QPointF(punta_, 1));
+}
+
+void AreaTriangular::setTriangulo(QString nombre_, qreal base1_, qreal base2_, QPointF punta_) {
+    nombre = nombre_;
+    base1.setX(base1_); // .2
+    base1.setY(0.0);
+    base2.setX(base2_); // .8
+    base2.setY(0.0);
+    punta = punta_; // .5
+
+    qWarning() << base1;
+    qWarning() << base2;
+    qWarning() << punta;
 }
 
 dReal AreaTriangular::evalua(dReal x) {
     dReal m;
     entrada = x;
-    if(x < base1[0]) {
+    if(x < base1.x()) {
         salida = 0.0;
-    } else if(x < punta[0]) { // entre base1 y punta
-        m = (punta[1] - base1[1]) / (punta[0] - base1[0]);
-        salida = m*(x - base1[0]) + base1[1];
-    } else if(x < base2[0]) { // entre punta y base2
-        m = (base2[1] - punta[1]) / (base2[0] - punta[0]);
-        salida = m*(x - punta[0]) + punta[1];
+    } else if(x < punta.x()) { // entre base1 y punta
+        m = (punta.y() - base1.y()) / (punta.x() - base1.x());
+        salida = m*(x - base1.x()) + base1.y();
+    } else if(x < base2.x()) { // entre punta y base2
+        m = (base2.y() - punta.y()) / (base2.x() - punta.x());
+        salida = m*(x - punta.x()) + punta.y();
     } else {
         salida = 0.0;
     }
@@ -37,5 +52,39 @@ dReal AreaTriangular::evalua(dReal x) {
 }
 
 void AreaTriangular::pintar(QPainter *p) {
-    qWarning("%f => %f", entrada, salida);
+
+    QPen pen = p->pen();
+    QBrush brush = p->brush();
+
+    p->setPen(Qt::black);
+    switch(id) {
+    case 0:
+        p->setBrush(QBrush(Qt::red));
+        break;
+    case 1:
+        p->setBrush(QBrush(Qt::yellow));
+        break;
+    }
+
+    QPointF points[3] = {
+        base1,
+        base2,
+        punta
+    };
+    p->drawPolygon(points, 3);
+//    p->drawRect(QRectF(0,0,1,10)); // largo
+
+//    qWarning("%f => %f", entrada, salida);
+
+    p->setPen(pen);
+    p->setBrush(brush);
+
 }
+
+
+
+
+
+
+
+

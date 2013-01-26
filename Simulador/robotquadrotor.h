@@ -12,6 +12,7 @@ class RobotQuadrotor : public ObjetoFisico
 public:
     RobotQuadrotor();
     ~RobotQuadrotor();
+    void setControl(Control *control_);
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
     void odeLoop();

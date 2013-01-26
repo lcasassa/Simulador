@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>524</width>
-    <height>580</height>
+    <width>1059</width>
+    <height>629</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,8 +39,14 @@
     </item>
     <item>
      <widget class="QWidget" name="widget" native="true">
-      <layout class="QFormLayout" name="formLayout">
-       <item row="0" column="0">
+      <property name="minimumSize">
+       <size>
+        <width>200</width>
+        <height>0</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
         <widget class="QSpinBox" name="spinBox">
          <property name="maximum">
           <number>2000</number>
@@ -53,7 +59,7 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item>
         <widget class="QSlider" name="horizontalSlider">
          <property name="maximum">
           <number>2000</number>
@@ -72,6 +78,22 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="ControlFuzzy" name="widget_fuzzyfication" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>200</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>200</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -82,7 +104,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>524</width>
+     <width>1059</width>
      <height>22</height>
     </rect>
    </property>
@@ -115,6 +137,12 @@
    <class>Simulador</class>
    <extends>QWidget</extends>
    <header>simulador.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ControlFuzzy</class>
+   <extends>QWidget</extends>
+   <header>controlfuzzy.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

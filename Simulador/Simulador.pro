@@ -9,6 +9,8 @@ QT       += core gui
 TARGET = Simulador
 TEMPLATE = app
 
+INCLUDEPATH += ../fuzzylite/
+LIBS += -L../fuzzylite/unix-static -lfuzzylite
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -20,7 +22,9 @@ SOURCES += main.cpp\
     robotquadrotor.cpp \
     sensorinfrarrojo.cpp \
     controlfuzzy.cpp \
-    control.cpp
+    control.cpp \
+    areatriangular.cpp \
+    fuzzyficacion.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -31,7 +35,9 @@ HEADERS  += mainwindow.h \
     robotquadrotor.h \
     sensorinfrarrojo.h \
     controlfuzzy.h \
-    control.h
+    control.h \
+    areatriangular.h \
+    fuzzyficacion.h
 
 FORMS    += mainwindow.ui
 

@@ -1,20 +1,23 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <QObject>
-#include <ode/ode.h>
+#include <QWidget>
+#include <QPainter>
 
-class Control : public QObject
+class Control : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Control(QObject *parent = 0);
+    explicit Control(QWidget *parent = 0);
     virtual ~Control();
-    virtual void loopControl(dReal *distanciaDetectado, dReal *salidas);
+    virtual void loopControl(qreal *distanciaDetectado, qreal *salidas);
+    virtual void pintar(QPainter *p);
 signals:
     
 public slots:
     
+protected:
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // CONTROL_H

@@ -21,12 +21,14 @@ public:
     void stop();
     bool startStop();
     Ode *ode;
+    void setControl(Control *control_);
 
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     QTimer *timer;
+    Control *control;
 
 signals:
     
