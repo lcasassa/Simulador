@@ -21,7 +21,7 @@ public:
     void stop();
     bool startStop();
     Ode *ode;
-    void setControl(Control *control_);
+//    void setControl(Control *control_);
 
 protected:
     void paintEvent(QPaintEvent *);

@@ -5,7 +5,7 @@
 Simulador::Simulador(QWidget *parent) :
     QWidget(parent)
 {
-    control = NULL;
+    //control = NULL;
 
     ode = new Ode(this);
 
@@ -14,22 +14,28 @@ Simulador::Simulador(QWidget *parent) :
     timer->setInterval(1/0.1);
 
 }
-
+/*
 void Simulador::setControl(Control *control_) {
     control = control_;
     ode->setControl(control_);
-}
+}*/
 
 Simulador::~Simulador() {
     stop();
+
+    foreach(ObjetoFisico* objetoFisico, listaObjetoFisico) {
+        delete objetoFisico;
+    }
+    listaObjetoFisico.clear();
+
     delete ode;
     delete timer;
 }
 
 void Simulador::timeout() {
     this->repaint();
-    if(control != NULL)
-        control->repaint();
+    //if(control != NULL)
+    //    control->repaint();
 }
 
 void Simulador::registrarObjeto(ObjetoFisico *objetoFisico) {

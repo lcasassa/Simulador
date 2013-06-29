@@ -9,6 +9,7 @@ class ObjetoCircunferencia : public ObjetoFisico
 {
 public:
     ObjetoCircunferencia(float radio_ = 0.5, float masa_ = 1.0, float roce_ = 0.1, float posicionInicialX_ = 0.0, float posicionInicialY_ = 0.0, float posicionInicialZ_ = 0.0);
+    ~ObjetoCircunferencia();
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
     void odeLoop();

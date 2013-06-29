@@ -9,6 +9,7 @@ class ObjetoLinea : public ObjetoFisico
 {
 public:
     ObjetoLinea(QPointF inicio_, QPointF fin_);
+    ~ObjetoLinea();
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
 

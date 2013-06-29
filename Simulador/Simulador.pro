@@ -9,7 +9,7 @@ QT       += core gui
 TARGET = Simulador
 TEMPLATE = app
 
-INCLUDEPATH += ../fuzzylite/
+INCLUDEPATH += ../fuzzylite
 LIBS += -L../fuzzylite/unix-static -lfuzzylite
 
 SOURCES += main.cpp\
@@ -47,6 +47,11 @@ FORMS    += mainwindow.ui
 #    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
 #}
 
+unix: !mac: {
+    DEFINES += dSINGLE
+    LIBS += -L/usr/lib -lode
+    INCLUDEPATH += /usr/include/
+}
 unix: mac: {
     DEFINES += dSINGLE
     LIBS += -L/usr/local/Cellar/ode/0.12/lib -lode

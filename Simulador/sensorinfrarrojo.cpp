@@ -41,8 +41,8 @@ void SensorInfrarrojo::odeLoop() {
     } else {
         dGeomRayGet(geom, pos, dir);
         dNormalize3(dir);
-        dScaleVector3(dir,distanciaMaxDetector);
-        dAddVectors3(plus, dir, pos);
+        //dScaleVector3(dir,distanciaMaxDetector);
+        //dAddVectors3(plus, dir, pos);
         bodyDetected[0] = plus[0];
         bodyDetected[1] = plus[1];
         bodyDetected[2] = plus[2];
@@ -98,7 +98,7 @@ bool SensorInfrarrojo::odeCollide(dGeomID o1, dGeomID o2) {
         p1 = dGeomGetPosition(o1);
 //        bodyDetected = dGeomGetPosition(o2);
 
-        p3 = dCalcPointsDistance3(p1, p2);
+        //p3 = dCalcPointsDistance3(p1, p2);
         if(p3 < distancia) {
             distancia = p3;
             bodyDetected_[0] = p2[0];

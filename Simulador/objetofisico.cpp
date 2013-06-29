@@ -4,6 +4,10 @@ ObjetoFisico::ObjetoFisico()
 {
 }
 
+ObjetoFisico::~ObjetoFisico()
+{
+}
+
 void ObjetoFisico::init(dWorldID *world, dSpaceID *space) {
 
 }

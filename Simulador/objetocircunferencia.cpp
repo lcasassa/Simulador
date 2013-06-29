@@ -10,6 +10,10 @@ ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce
     posicionInicialZ = posicionInicialZ_;
 }
 
+ObjetoCircunferencia::~ObjetoCircunferencia() {
+
+}
+
 void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
     // create object
     body = dBodyCreate (*world);

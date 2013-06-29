@@ -9,6 +9,7 @@ class ObjetoFisico
 {
 public:
     ObjetoFisico();
+    virtual ~ObjetoFisico();
     virtual void init(dWorldID *world, dSpaceID *space);
     virtual void odeLoop();
     virtual bool odeCollide(dGeomID o1, dGeomID o2);

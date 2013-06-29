@@ -21,8 +21,6 @@ protected:
      void keyReleaseEvent(QKeyEvent* event);
 
 private slots:
-     void on_actionStart_Stop_triggered();
-
      void on_spinBox_valueChanged(int arg1);
 
 private:

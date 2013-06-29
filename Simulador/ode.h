@@ -18,7 +18,7 @@ public:
     void stopOde();
     static void nearCallback(void *data, dGeomID o1, dGeomID o2);
     int sleepTime;
-    void setControl(Control *control);
+//    void setControl(Control *control);
 
 protected:
     void run();

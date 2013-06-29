@@ -12,7 +12,7 @@ class RobotQuadrotor : public ObjetoFisico
 public:
     RobotQuadrotor();
     ~RobotQuadrotor();
-    void setControl(Control *control_);
+//    void setControl(Control *control_);
     void init(dWorldID *world, dSpaceID *space);
     void pintar(QPainter *p);
     void odeLoop();
@@ -38,7 +38,7 @@ private:
     dMass m;
     float radio;
     float masa;
-    Control *control;
+//    Control *control;
 };
 
 #endif // ROBOTQUADROTOR_H

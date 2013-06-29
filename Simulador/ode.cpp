@@ -20,11 +20,12 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 {
     simulador = simulador_;
     sim = simulador;
-    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0, 2));
-    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 2, 2));
-    simulador->registrarObjeto(new ObjetoCircunferencia(0.5,1,0.3, 0,-2));
+
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 0, 2));
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 2, 2));
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 0,-2));
     robotQuadrotor = new RobotQuadrotor();
-    simulador->registrarObjeto(robotQuadrotor);
+    simulador->registrarObjeto((ObjetoFisico *)robotQuadrotor);
 
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
@@ -35,21 +36,21 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-4,-4), QPointF(-4, 4.5)));
  */
     qreal ancho=0.1, largo=4.5;
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho))); // arriba
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho))); // arriba
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
 
 
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
+    simulador->registrarObjeto((ObjetoFisico *)new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
 
 //    simulador->registrarObjeto(new SensorInfrarrojo());
     sleepTime = 1000;
 }
 
-void Ode::setControl(Control *control) {
+/*void Ode::setControl(Control *control) {
     robotQuadrotor->setControl(control);
-}
+}*/
 
 void Ode::stopOde() {
     running = 0;

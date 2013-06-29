@@ -51,10 +51,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    on_actionStart_Stop_triggered();
+    //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
 
-    ui->simuladorWidget->setControl(ui->widget_fuzzyfication);
+    //ui->simuladorWidget->setControl(ui->widget_fuzzyfication);
 }
 
 MainWindow::~MainWindow()
@@ -65,15 +65,6 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent *event) {
     qWarning("Esperando a que se cierre el thread");
     ui->simuladorWidget->stop();
-}
-
-void MainWindow::on_actionStart_Stop_triggered()
-{
-    if(ui->simuladorWidget->startStop()) {
-        ui->actionStart_Stop->setText("Stop");
-    } else {
-        ui->actionStart_Stop->setText("Start");
-    }
 }
 
 void MainWindow::on_spinBox_valueChanged(int arg1)

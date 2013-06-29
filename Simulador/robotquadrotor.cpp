@@ -17,7 +17,7 @@ RobotQuadrotor::RobotQuadrotor()
     objetoCircunferencia[2] = new ObjetoCircunferencia(0.5,0.3,1,  0.5,-0.5);
     objetoCircunferencia[3] = new ObjetoCircunferencia(0.5,0.3,1, -0.5,-0.5);
 */
-    control = NULL;
+    //control = NULL;
 
     radio = 0.3;
     masa = 1;
@@ -29,11 +29,11 @@ RobotQuadrotor::RobotQuadrotor()
 //    control = new ControlFuzzy();
 
 }
-
+/*
 void RobotQuadrotor::setControl(Control *control_) {
     control = control_;
     qWarning("set control");
-}
+}*/
 
 RobotQuadrotor::~RobotQuadrotor() {
     /*
@@ -132,8 +132,8 @@ void RobotQuadrotor::odeLoop() {
     qreal salidas[3];
     qreal distanciaDetectado[3];
     distanciaDetectado[0] = sensorInfrarrojo[0][0]->distanciaDetectado;
-    if(control != NULL)
-        control->loopControl(distanciaDetectado, salidas);
+    //if(control != NULL)
+    //    control->loopControl(distanciaDetectado, salidas);
     dBodyAddRelForce (body,  0.1*salidas[0],  0.0, 0);
 
     // Roce
