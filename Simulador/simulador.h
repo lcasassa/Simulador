@@ -2,9 +2,7 @@
 #define SIMULADOR_H
 
 #include <QWidget>
-#include <QThread>
 #include <QList>
-#include <QScopedPointer>
 
 #include "ode.h"
 #include "objetofisico.h"
@@ -17,22 +15,20 @@ public:
     ~Simulador();
     void registrarObjeto(ObjetoFisico *objetoFisico);
     QList<ObjetoFisico*> listaObjetoFisico;
-    void start();
+    void play();
+    void pause();
+    bool playPause();
+    void reset();
     void stop();
-    bool startStop();
     Ode *ode;
-//    void setControl(Control *control_);
+    void setRefrescoHz(int refrescoHz);
 
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     QTimer *timer;
-    Control *control;
 
-signals:
-    
-public slots:
 private slots:
     void timeout();
     

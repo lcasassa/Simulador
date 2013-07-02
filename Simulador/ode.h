@@ -13,20 +13,26 @@ class Simulador;
 class Ode : public QThread
 {
     Q_OBJECT
+    enum RUNNINGMODE { STEP, PAUSE, PLAY };
 public:
     explicit Ode(Simulador *simulador_, QObject *parent = 0);
     void stopOde();
+    void playOde();
+    void pauseOde();
+    void stepOde();
+    bool isRunning();
     static void nearCallback(void *data, dGeomID o1, dGeomID o2);
-    int sleepTime;
-//    void setControl(Control *control);
+    static int sleepTime;
 
 protected:
     void run();
+    void lockObjetosFisicos();
+    void unlockObjetosFisicos();
 
 private:
-    RobotQuadrotor *robotQuadrotor;
     Simulador *simulador;
     int running;
+    enum RUNNINGMODE runningMode;
 
 signals:
     

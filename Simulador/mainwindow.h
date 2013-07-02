@@ -21,10 +21,14 @@ protected:
      void keyReleaseEvent(QKeyEvent* event);
 
 private slots:
-     void on_spinBox_valueChanged(int arg1);
+     void on_spinBoxLoopSleepUs_valueChanged(int arg1);
+     void on_pushButtonStart_clicked();
+
+     void on_spinBoxRefrescoHz_valueChanged(int arg1);
+
+     void on_pushButtonReset_clicked();
 
 private:
-     friend void setControl();
     Ui::MainWindow *ui;
 
 };

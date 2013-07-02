@@ -11,37 +11,16 @@ bool RobotQuadrotor::key_anticlock = false;
 
 RobotQuadrotor::RobotQuadrotor()
 {
-    /*
-    objetoCircunferencia[0] = new ObjetoCircunferencia(0.5,0.3,1,  0.5, 0.5); // radio, peso, roce, x, y
-    objetoCircunferencia[1] = new ObjetoCircunferencia(0.5,0.3,1, -0.5, 0.5);
-    objetoCircunferencia[2] = new ObjetoCircunferencia(0.5,0.3,1,  0.5,-0.5);
-    objetoCircunferencia[3] = new ObjetoCircunferencia(0.5,0.3,1, -0.5,-0.5);
-*/
-    //control = NULL;
-
     radio = 0.3;
     masa = 1;
 
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j] = new SensorInfrarrojo(radio*5);
-
-//    control = new ControlFuzzy();
-
 }
-/*
-void RobotQuadrotor::setControl(Control *control_) {
-    control = control_;
-    qWarning("set control");
-}*/
 
 RobotQuadrotor::~RobotQuadrotor() {
-    /*
-    delete objetoCircunferencia[0];
-    delete objetoCircunferencia[1];
-    delete objetoCircunferencia[2];
-    delete objetoCircunferencia[3];
-    */
+
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             delete sensorInfrarrojo[i][j];
@@ -73,8 +52,6 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
     dGeomSetOffsetPosition( geom[2], -radio,  radio, 0);
     dGeomSetOffsetPosition( geom[3], -radio, -radio, 0);
 
-//    dGeomRaySet( sensorInfrarrojo[1]->geom, 0.5, 0.5, 0.0, 1, 1, 0 );
-
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             dGeomSetBody( sensorInfrarrojo[i][j]->geom, body );
@@ -102,10 +79,6 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
         dGeomSetOffsetRotation( sensorInfrarrojo[3][j]->geom, R );
     }
 
-
-    /*joint[3] = dJointCreateFixed(*world, 0);
-    dJointAttach(joint[3], objetoCircunferencia[2]->body, sensorInfrarrojo.);
-    dJointSetFixed(joint[3]);*/
 
 }
 
@@ -149,7 +122,7 @@ void RobotQuadrotor::odeLoop() {
     v = dBodyGetLinearVel(body);
     w = dBodyGetAngularVel(body);
     dBodyAddForce (body, -roce*v[0], -roce*v[1], -roce*v[2]);
-    dBodyAddTorque (body, -roce*w[0]/4, -roce*w[1]/4, -roce*w[2]/4);
+    dBodyAddTorque (body, -roce*w[0]*2, -roce*w[1]*2, -roce*w[2]*2);
 }
 
 void RobotQuadrotor::pintarCirculo(QPainter *p, int i) {

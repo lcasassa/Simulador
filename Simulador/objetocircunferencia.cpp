@@ -8,6 +8,7 @@ ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce
     posicionInicialX = posicionInicialX_;
     posicionInicialY = posicionInicialY_;
     posicionInicialZ = posicionInicialZ_;
+    tiempo = 0;
 }
 
 ObjetoCircunferencia::~ObjetoCircunferencia() {
@@ -61,13 +62,12 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
 
 void ObjetoCircunferencia::odeLoop() {
     const dReal *v,*w;
-    static int i=0;
 
-    dBodyAddForce (body, sin((float)(i++%(2*3141))/1000.0)*0.3, cos((float)(i++%(2*3141))/1000.0)*0.1, 0);
+    dBodyAddForce (body, sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, 0);
+    tiempo += 0.5;
     // Roce
     v = dBodyGetLinearVel(body);
     w = dBodyGetAngularVel(body);
     dBodyAddForce (body, -roce*v[0], -roce*v[1], -roce*v[2]);
     dBodyAddTorque (body, -roce*w[0]/4, -roce*w[1]/4, -roce*w[2]/4);
-
 }

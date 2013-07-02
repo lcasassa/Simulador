@@ -9,6 +9,9 @@ QT       += core gui
 TARGET = Simulador
 TEMPLATE = app
 
+QMAKE_CXXFLAGS += -O0
+QMAKE_LFLAGS += -O0
+
 INCLUDEPATH += ../fuzzylite
 LIBS += -L../fuzzylite/unix-static -lfuzzylite
 
@@ -47,13 +50,18 @@ FORMS    += mainwindow.ui
 #    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
 #}
 
+# ode 0.12, 0.11 de ubuntu no!
 unix: !mac: {
-    DEFINES += dSINGLE
-    LIBS += -L/usr/lib -lode
-    INCLUDEPATH += /usr/include/
+    #CONFIG += link_pkgconfig
+    #PKGCONFIG += ode
+    DEFINES += dDOUBLE
+    LIBS += -L../ode-0.12/ode/src -lode
+    INCLUDEPATH += ../ode-0.12/include
+
 }
 unix: mac: {
-    DEFINES += dSINGLE
+    #DEFINES += dSINGLE #32 bits
+    DEFINES += dDOUBLE #64 bits
     LIBS += -L/usr/local/Cellar/ode/0.12/lib -lode
     INCLUDEPATH += /usr/local/Cellar/ode/0.12/include/
 }

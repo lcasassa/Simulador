@@ -41,8 +41,8 @@ void SensorInfrarrojo::odeLoop() {
     } else {
         dGeomRayGet(geom, pos, dir);
         dNormalize3(dir);
-        //dScaleVector3(dir,distanciaMaxDetector);
-        //dAddVectors3(plus, dir, pos);
+        dScaleVector3(dir,distanciaMaxDetector);
+        dAddVectors3(plus, dir, pos);
         bodyDetected[0] = plus[0];
         bodyDetected[1] = plus[1];
         bodyDetected[2] = plus[2];
@@ -61,7 +61,7 @@ void SensorInfrarrojo::pintar(QPainter *p) {
 
     QPen backup_pen = p->pen();
     QPen pen;
-    pen.setWidthF(0.001);
+    pen.setWidthF(0.01);
 
     pen.setColor(Qt::red);
     p->setPen(pen);
@@ -90,7 +90,7 @@ bool SensorInfrarrojo::odeCollide(dGeomID o1, dGeomID o2) {
         dReal p3;
         int numc;
         if (numc = dCollide (o1, o2, 1, &contact, sizeof(dContactGeom))) {
-            p2 = (dReal *)&contact.pos;
+            p2 = (dReal*)&contact.pos;
         } else {
             return true;
         }
@@ -98,7 +98,7 @@ bool SensorInfrarrojo::odeCollide(dGeomID o1, dGeomID o2) {
         p1 = dGeomGetPosition(o1);
 //        bodyDetected = dGeomGetPosition(o2);
 
-        //p3 = dCalcPointsDistance3(p1, p2);
+        p3 = dDISTANCE(p1, p2);
         if(p3 < distancia) {
             distancia = p3;
             bodyDetected_[0] = p2[0];

@@ -54,7 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
 
-    //ui->simuladorWidget->setControl(ui->widget_fuzzyfication);
+    ui->simuladorWidget->ode->sleepTime = ui->spinBoxLoopSleepUs->value();
+    ui->simuladorWidget->setRefrescoHz( ui->spinBoxRefrescoHz->value() );
 }
 
 MainWindow::~MainWindow()
@@ -67,7 +68,27 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     ui->simuladorWidget->stop();
 }
 
-void MainWindow::on_spinBox_valueChanged(int arg1)
+void MainWindow::on_pushButtonStart_clicked()
+{
+    if( ui->simuladorWidget->playPause() ) {
+        ui->pushButtonStart->setText("Stop");
+    } else {
+        ui->pushButtonStart->setText("Start");
+    }
+}
+
+void MainWindow::on_spinBoxLoopSleepUs_valueChanged(int arg1)
 {
     ui->simuladorWidget->ode->sleepTime = arg1;
+}
+
+void MainWindow::on_spinBoxRefrescoHz_valueChanged(int arg1)
+{
+    ui->simuladorWidget->setRefrescoHz(arg1);
+}
+
+void MainWindow::on_pushButtonReset_clicked()
+{
+    ui->simuladorWidget->reset();
+    ui->pushButtonStart->setText("Start");
 }

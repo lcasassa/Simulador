@@ -24,6 +24,7 @@ private:
     float posicionInicialX;
     float posicionInicialY;
     float posicionInicialZ;
+    float tiempo = 0;
 };
 
 #endif // OBJETOCIRCUNFERENCIA_H
