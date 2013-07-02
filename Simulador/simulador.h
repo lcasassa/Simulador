@@ -16,6 +16,7 @@ public:
     void registrarObjeto(ObjetoFisico *objetoFisico);
     QList<ObjetoFisico*> listaObjetoFisico;
     void play();
+    void step(int steps_ = 1);
     void pause();
     bool playPause();
     void reset();

@@ -92,3 +92,8 @@ void MainWindow::on_pushButtonReset_clicked()
     ui->simuladorWidget->reset();
     ui->pushButtonStart->setText("Start");
 }
+
+void MainWindow::on_pushButtonStep_clicked()
+{
+    ui->simuladorWidget->step( ui->spinBoxSteps->value() );
+}

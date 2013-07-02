@@ -52,6 +52,13 @@ void Simulador::play() {
     timer->start();
 }
 
+void Simulador::step(int steps_) {
+    timer->stop();
+    ode->stepOde(steps_);
+    for(int i=0; i<10; i++)
+        QTimer::singleShot(100*i, this, SLOT(timeout())); // just in case ode takes more time to solve all the steps
+}
+
 void Simulador::pause() {
     ode->pauseOde();
     timer->stop();
@@ -79,10 +86,11 @@ void Simulador::reset() {
 }
 
 void Simulador::paintEvent(QPaintEvent *) {
+
+    //qWarning("paint loop");
     QPainter p;
     float radio;
 
-    //if(!timer->isActive()) return;
     if(!ode->isRunning()) return;
 
     radio = (this->width()/this->height()) < 1 ? this->width() : this->height();
@@ -96,5 +104,6 @@ void Simulador::paintEvent(QPaintEvent *) {
     }
 
     p.end();
+
 }
 

@@ -13,14 +13,16 @@ class Simulador;
 class Ode : public QThread
 {
     Q_OBJECT
-    enum RUNNINGMODE { STEP, PAUSE, PLAY };
+    enum STATUS_MODE { ODE_NOT_INIT = -4, SUBSTRACT_ONE = -3, STOP = -2, PLAY = -1, PAUSE = 0, STEP = 1 };
 public:
     explicit Ode(Simulador *simulador_, QObject *parent = 0);
     void stopOde();
     void playOde();
     void pauseOde();
-    void stepOde();
+    void stepOde(int steps_ = 1);
     bool isRunning();
+    void setStatus(int status_);
+    int getStatus();
     static void nearCallback(void *data, dGeomID o1, dGeomID o2);
     static int sleepTime;
 
@@ -31,8 +33,8 @@ protected:
 
 private:
     Simulador *simulador;
-    int running;
-    enum RUNNINGMODE runningMode;
+    int status;
+    QMutex statusMutex;
 
 signals:
     

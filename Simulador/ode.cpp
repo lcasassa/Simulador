@@ -48,6 +48,7 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 
     //    simulador->registrarObjeto(new SensorInfrarrojo());
 
+    setStatus(ODE_NOT_INIT);
     start();
 }
 
@@ -56,31 +57,41 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 }*/
 
 void Ode::stopOde() {
-    running = 0;
+    setStatus(STOP);
 }
 
 void Ode::playOde() {
-    running = 1;
-    runningMode = PLAY;
-
+    setStatus(PLAY);
 }
 
 void Ode::pauseOde() {
-    running = 1;
-    runningMode = PAUSE;
+    setStatus(PAUSE);
 }
 
-void Ode::stepOde() {
-    running = 1;
-    runningMode = STEP;
+void Ode::stepOde(int steps_) {
+    if(steps_ > 0)
+        setStatus(steps_);
 }
 
 bool Ode::isRunning() {
-    if(running == 1)
-        return true;
-    return false;
+    return (getStatus() >= -1);
 }
 
+int Ode::getStatus() {
+    statusMutex.lock();
+    int status_ = status;
+    statusMutex.unlock();
+    return status_;
+}
+
+void Ode::setStatus(int status_) {
+    statusMutex.lock();
+    if(status_ == SUBSTRACT_ONE)
+        status -= 1;
+    else
+        status = status_;
+    statusMutex.unlock();
+}
 
 void Ode::run() {
 
@@ -102,15 +113,17 @@ void Ode::run() {
     unlockObjetosFisicos();
 
     pauseOde();
+    stepOde(2); // Para que se pinte bien sensorinfrarrojo.cpp
     // run simulation
 //    dsSimulationLoop (0,0,352,288,0);
-    while(running) {
+    while(getStatus() > STOP) {
 
-        while(running && runningMode == PAUSE)
+        while(getStatus() == PAUSE)
             this->msleep(50);
 
-        if(runningMode == STEP)
-            runningMode = PAUSE;
+        if(getStatus() >= STEP) {
+            setStatus(SUBSTRACT_ONE);
+        }
 
         lockObjetosFisicos();
 
@@ -132,6 +145,7 @@ void Ode::run() {
         if(sleepTime != 0)
             this->usleep(sleepTime);
 
+        //qWarning("ode loop");
     }
 
     // clean up
