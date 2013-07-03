@@ -11,6 +11,17 @@ Trainer::~Trainer() {
 
 void Trainer::run() {
 
-    while(1) ;
+    qWarning("Trainer: Play");
+    emit playOde();
+    msleep(1000);
+    qWarning("Trainer: Stop");
+    emit stopOde();
+    msleep(1000);
+    qWarning("Trainer: Reset");
+    emit resetOde();
+    msleep(1000);
+    qWarning("Trainer: Play");
+    emit playOde();
+    msleep(1000);
 
 }

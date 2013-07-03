@@ -13,6 +13,10 @@ Simulador::Simulador(QWidget *parent) :
     setRefrescoHz(30);
     connect(timer, SIGNAL(timeout()),this, SLOT(timeout()));
 
+    trainer = new Trainer(this);
+    connect(trainer, SIGNAL(playOde()), this, SLOT(play()));
+    connect(trainer, SIGNAL(stopOde()), this, SLOT(stop()));
+    connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()));
 
 }
 

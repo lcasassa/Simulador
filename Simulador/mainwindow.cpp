@@ -100,5 +100,5 @@ void MainWindow::on_pushButtonStep_clicked()
 
 void MainWindow::on_pushButtonStartTraining_clicked()
 {
-
+    ui->simuladorWidget->trainer->start();
 }

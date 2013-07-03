@@ -5,6 +5,7 @@
 #include <QList>
 
 #include "ode.h"
+#include "trainer.h"
 #include "objetofisico.h"
 
 class Simulador : public QWidget
@@ -15,14 +16,17 @@ public:
     ~Simulador();
     void registrarObjeto(ObjetoFisico *objetoFisico);
     QList<ObjetoFisico*> listaObjetoFisico;
+    bool playPause();
+    Ode *ode;
+    Trainer *trainer;
+    void setRefrescoHz(int refrescoHz);
+
+public slots:
     void play();
     void step(int steps_ = 1);
     void pause();
-    bool playPause();
     void reset();
     void stop();
-    Ode *ode;
-    void setRefrescoHz(int refrescoHz);
 
 protected:
     void paintEvent(QPaintEvent *);
