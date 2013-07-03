@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     controlfuzzy.cpp \
     control.cpp \
     areatriangular.cpp \
-    fuzzyficacion.cpp
+    fuzzyficacion.cpp \
+    trainer.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -40,7 +41,8 @@ HEADERS  += mainwindow.h \
     controlfuzzy.h \
     control.h \
     areatriangular.h \
-    fuzzyficacion.h
+    fuzzyficacion.h \
+    trainer.h
 
 FORMS    += mainwindow.ui
 

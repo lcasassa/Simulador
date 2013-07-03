@@ -97,3 +97,8 @@ void MainWindow::on_pushButtonStep_clicked()
 {
     ui->simuladorWidget->step( ui->spinBoxSteps->value() );
 }
+
+void MainWindow::on_pushButtonStartTraining_clicked()
+{
+
+}

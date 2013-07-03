@@ -30,6 +30,8 @@ private slots:
 
      void on_pushButtonStep_clicked();
 
+     void on_pushButtonStartTraining_clicked();
+
 private:
     Ui::MainWindow *ui;
 
