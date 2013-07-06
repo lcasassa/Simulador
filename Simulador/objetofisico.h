@@ -5,8 +5,9 @@
 #include <QMutex>
 #include <ode/ode.h>
 
-class ObjetoFisico
+class ObjetoFisico : public QObject
 {
+    Q_OBJECT
 public:
     ObjetoFisico();
     virtual ~ObjetoFisico();
@@ -17,6 +18,7 @@ public:
     virtual void lock();
     virtual void unlock();
     QMutex mutex;
+    bool isOdeInit;
 };
 
 #endif // OBJETOFISICO_H

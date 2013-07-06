@@ -26,6 +26,7 @@ void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
     dBodySetPosition (body,posicionInicialX, posicionInicialY, 0);
     //posicionInicialZ
     //dBodySetRotation(body, );
+    ObjetoFisico::init(world, space);
 }
 
 
@@ -63,7 +64,7 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
 void ObjetoCircunferencia::odeLoop() {
     const dReal *v,*w;
 
-    dBodyAddForce (body, sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, 0);
+    dBodyAddForce (body, cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, 0);
     tiempo += 0.5;
     // Roce
     v = dBodyGetLinearVel(body);

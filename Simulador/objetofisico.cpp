@@ -2,6 +2,7 @@
 
 ObjetoFisico::ObjetoFisico()
 {
+    isOdeInit = false;
 }
 
 ObjetoFisico::~ObjetoFisico()
@@ -9,7 +10,7 @@ ObjetoFisico::~ObjetoFisico()
 }
 
 void ObjetoFisico::init(dWorldID *world, dSpaceID *space) {
-
+    isOdeInit = true;
 }
 
 void ObjetoFisico::odeLoop() {

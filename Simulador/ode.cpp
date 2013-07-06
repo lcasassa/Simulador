@@ -5,7 +5,6 @@
 #include "simulador.h"
 #include "objetocircunferencia.h"
 #include "objetolinea.h"
-#include "robotquadrotor.h"
 #include "sensorinfrarrojo.h"
 
 // dynamics and collision objects
@@ -20,14 +19,11 @@ int Ode::sleepTime = 1000;
 Ode::Ode(Simulador *simulador_, QObject *parent) :
     QThread(parent)
 {
+    setStatus(ODE_NOT_INIT);
+    stepEmitCommandDone = false;
+
     simulador = simulador_;
     sim = simulador;
-
-    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 0, 2));
-    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 2, 2));
-    simulador->registrarObjeto((ObjetoFisico *)new ObjetoCircunferencia(0.5,1,0.3, 0,-2));
-
-    simulador->registrarObjeto((ObjetoFisico *)new RobotQuadrotor());
 
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
@@ -38,17 +34,16 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-4,-4), QPointF(-4, 4.5)));
  */
     qreal ancho=0.1, largo=4.5;
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho))); // arriba
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // arriba
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // derecha
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // abajo
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // izquiera
 
 
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
+    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // centro
 
     //    simulador->registrarObjeto(new SensorInfrarrojo());
 
-    setStatus(ODE_NOT_INIT);
     start();
 }
 
@@ -68,9 +63,10 @@ void Ode::pauseOde() {
     setStatus(PAUSE);
 }
 
-void Ode::stepOde(int steps_) {
+void Ode::stepOde(int steps_, bool stepEmitCommandDone_) {
     if(steps_ > 0)
         setStatus(steps_);
+    stepEmitCommandDone = stepEmitCommandDone_;
 }
 
 bool Ode::isRunning() {
@@ -95,8 +91,6 @@ void Ode::setStatus(int status_) {
 
 void Ode::run() {
 
-    lockObjetosFisicos();
-
     dInitODE ();
     // create world
     world = dWorldCreate ();
@@ -105,15 +99,7 @@ void Ode::run() {
     dWorldSetCFM (world,1e-5);
     contactgroup = dJointGroupCreate (0);
 
-    //loop objeto fisico
-    for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
-        simulador->listaObjetoFisico[i]->init(&world, &space);
-    }
-
-    unlockObjetosFisicos();
-
-    pauseOde();
-    stepOde(2); // Para que se pinte bien sensorinfrarrojo.cpp
+    setStatus(2); // Para que se pinte bien sensorinfrarrojo.cpp
     // run simulation
 //    dsSimulationLoop (0,0,352,288,0);
     while(getStatus() > STOP) {
@@ -123,15 +109,25 @@ void Ode::run() {
 
         if(getStatus() >= STEP) {
             setStatus(SUBSTRACT_ONE);
+            if(stepEmitCommandDone && getStatus() == 0) {
+                stepEmitCommandDone = false;
+                emit commandDone();
+            }
         }
 
         lockObjetosFisicos();
+
+        for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
+            if(!simulador->listaObjetoFisico[i]->isOdeInit)
+                simulador->listaObjetoFisico[i]->init(&world, &space);
+        }
 
         // find collisions and add contact joints
         dSpaceCollide (space,0,&nearCallback);
 
         for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
-            simulador->listaObjetoFisico[i]->odeLoop();
+            if(simulador->listaObjetoFisico[i]->isOdeInit)
+                simulador->listaObjetoFisico[i]->odeLoop();
         }
 
         // step the simulation

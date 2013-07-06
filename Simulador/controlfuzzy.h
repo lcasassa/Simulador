@@ -8,7 +8,7 @@ class ControlFuzzy : public Control
 {
     Q_OBJECT
 public:
-    explicit ControlFuzzy(QWidget *parent = 0);
+    explicit ControlFuzzy(Fuzzyficacion *fuzzyficacion_, QWidget *parent = 0);
     ~ControlFuzzy();
     void loopControl(qreal *distanciaDetectado, qreal *salidas);
     void pintar(QPainter *p);
@@ -18,7 +18,7 @@ signals:
     
 public slots:
 private:
-    Fuzzyficacion fuzzyficacion;
+    Fuzzyficacion *fuzzyficacion;
     
 };
 

@@ -18,6 +18,7 @@ public:
     void unlock();
     dGeomID geom;
     dReal distanciaDetectado;
+    double getDistancia();
 
 private:
     dVector3 pos, dir, plus;

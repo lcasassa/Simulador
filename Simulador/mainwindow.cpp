@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->simuladorWidget->ode->sleepTime = ui->spinBoxLoopSleepUs->value();
     ui->simuladorWidget->setRefrescoHz( ui->spinBoxRefrescoHz->value() );
+    connect(ui->simuladorWidget->trainer, SIGNAL(finished()), this, SLOT(trainerFinished()));
 }
 
 MainWindow::~MainWindow()
@@ -100,5 +101,11 @@ void MainWindow::on_pushButtonStep_clicked()
 
 void MainWindow::on_pushButtonStartTraining_clicked()
 {
+    ui->pushButtonStartTraining->setEnabled(false);
     ui->simuladorWidget->trainer->start();
 }
+
+void MainWindow::trainerFinished() {
+    ui->pushButtonStartTraining->setEnabled(true);
+}
+

@@ -9,7 +9,7 @@ bool RobotQuadrotor::key_clock = false;
 bool RobotQuadrotor::key_anticlock = false;
 
 
-RobotQuadrotor::RobotQuadrotor()
+RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_)
 {
     radio = 0.3;
     masa = 1;
@@ -17,6 +17,10 @@ RobotQuadrotor::RobotQuadrotor()
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j] = new SensorInfrarrojo(radio*5);
+
+    minDistance = radio*5;
+
+    control = control_;
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -25,6 +29,10 @@ RobotQuadrotor::~RobotQuadrotor() {
         for(int j=0; j<4; j++)
             delete sensorInfrarrojo[i][j];
 
+}
+
+double RobotQuadrotor::getMinDistance() {
+    return minDistance - 0.3; // radio of the circles
 }
 
 void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
@@ -79,7 +87,7 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
         dGeomSetOffsetRotation( sensorInfrarrojo[3][j]->geom, R );
     }
 
-
+    ObjetoFisico::init(world, space);
 }
 
 void RobotQuadrotor::odeLoop() {
@@ -88,6 +96,8 @@ void RobotQuadrotor::odeLoop() {
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j]->odeLoop();
+
+    dBodyAddRelForce (body,  0.001, 0, 0);
 
     if(key_up)
         dBodyAddRelForce (body,  0.3,  0.0, 0);
@@ -105,9 +115,9 @@ void RobotQuadrotor::odeLoop() {
     qreal salidas[3];
     qreal distanciaDetectado[3];
     distanciaDetectado[0] = sensorInfrarrojo[0][0]->distanciaDetectado;
-    //if(control != NULL)
-    //    control->loopControl(distanciaDetectado, salidas);
-    dBodyAddRelForce (body,  0.1*salidas[0],  0.0, 0);
+    if(control != NULL)
+        control->loopControl(distanciaDetectado, salidas);
+    dBodyAddRelForce (body, 0.01*salidas[0], 0.0, 0);
 
     // Roce
 //    dBodyAddRelForce (body, cos((j++%3141)/1000)*0.3, 0, 0);
@@ -223,8 +233,12 @@ bool RobotQuadrotor::odeCollide(dGeomID o1, dGeomID o2) {
     }*/
 
     for(int i=0; i<4; i++)
-        for(int j=0; j<4; j++)
-            if(sensorInfrarrojo[i][j]->odeCollide(o1, o2)) return true;
+        for(int j=0; j<4 ; j++)
+            if(sensorInfrarrojo[i][j]->odeCollide(o1, o2)) {
+                float alfa = 0.2;
+                minDistance = minDistance*(1-alfa) + (sensorInfrarrojo[i][j]->getDistancia() - minDistance)*alfa;
+                return true;
+            }
 
     return false;
 }

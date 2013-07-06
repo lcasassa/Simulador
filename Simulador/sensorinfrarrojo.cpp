@@ -56,6 +56,10 @@ void SensorInfrarrojo::odeLoop() {
 
 }
 
+double SensorInfrarrojo::getDistancia() {
+    return (double)distanciaDetectado;
+}
+
 void SensorInfrarrojo::pintar(QPainter *p) {
     mutex.lock();
 
@@ -89,7 +93,7 @@ bool SensorInfrarrojo::odeCollide(dGeomID o1, dGeomID o2) {
         dReal *p2;
         dReal p3;
         int numc;
-        if (numc = dCollide (o1, o2, 1, &contact, sizeof(dContactGeom))) {
+        if ((numc = dCollide (o1, o2, 1, &contact, sizeof(dContactGeom)))) {
             p2 = (dReal*)&contact.pos;
         } else {
             return true;

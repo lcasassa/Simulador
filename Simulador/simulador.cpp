@@ -1,11 +1,17 @@
 #include "simulador.h"
+#include "traineralgoritmogenetico.h"
 #include <QPainter>
 #include <QTimer>
+
+//#define DEBUG_SIMULADOR 1
 
 Simulador::Simulador(QWidget *parent) :
     QWidget(parent)
 {
 
+#ifdef DEBUG_SIMULADOR
+    qWarning("new Ode()");
+#endif
     ode = new Ode(this);
 //    QTimer::singleShot(100, this, SLOT(timeout()));
 
@@ -13,18 +19,27 @@ Simulador::Simulador(QWidget *parent) :
     setRefrescoHz(30);
     connect(timer, SIGNAL(timeout()),this, SLOT(timeout()));
 
-    trainer = new Trainer(this);
-    connect(trainer, SIGNAL(playOde()), this, SLOT(play()));
-    connect(trainer, SIGNAL(stopOde()), this, SLOT(stop()));
+#ifdef DEBUG_SIMULADOR
+    qWarning("new Trainer()");
+#endif
+    trainer = new TrainerAlgoritmoGenetico(this);
+
+    connect(trainer, SIGNAL(playOde()),  this, SLOT(play()));
+    connect(trainer, SIGNAL(stopOde()),  this, SLOT(stop()));
     connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()));
+    connect(trainer, SIGNAL(pauseOde()), this, SLOT(pause()));
+    connect(trainer, SIGNAL(stepOde(int)), this, SLOT(step(int)));
+    connect(trainer, SIGNAL(registrarObjetoSimulador(ObjetoFisico*)), this, SLOT(registrarObjeto(ObjetoFisico*)));
+    connect(trainer, SIGNAL(desregistrarObjetoSimulador(ObjetoFisico*)), this, SLOT(desregistrarObjeto(ObjetoFisico*)));
+    connect(this, SIGNAL(commandDone()), trainer, SLOT(odeCommandDone())); // sync trainer
+    connect(ode,  SIGNAL(commandDone()), trainer, SLOT(odeCommandDone())); // step
 
 }
 
 Simulador::~Simulador() {
     stop();
 
-    while(!listaObjetoFisico.isEmpty())
-        delete listaObjetoFisico.takeFirst();
+    listaObjetoFisico.clear();
 
     delete ode;
     delete timer;
@@ -38,8 +53,17 @@ void Simulador::timeout() {
     this->repaint();
 }
 
-void Simulador::registrarObjeto(ObjetoFisico *objetoFisico) {
+void Simulador::registrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
     listaObjetoFisico.append(objetoFisico);
+    if(sendCommandDone)
+        emit commandDone();
+
+}
+
+void Simulador::desregistrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
+    listaObjetoFisico.removeOne(objetoFisico);
+    if(sendCommandDone)
+        emit commandDone();
 }
 
 bool Simulador::playPause() {
@@ -51,41 +75,53 @@ bool Simulador::playPause() {
     return timer->isActive();
 }
 
-void Simulador::play() {
+void Simulador::play(bool sendCommandDone) {
     ode->playOde();
     timer->start();
+    if(sendCommandDone)
+        emit commandDone();
 }
 
 void Simulador::step(int steps_) {
     timer->stop();
-    ode->stepOde(steps_);
+    ode->stepOde(steps_, true);
     for(int i=0; i<10; i++)
         QTimer::singleShot(100*i, this, SLOT(timeout())); // just in case ode takes more time to solve all the steps
+}
+
+void Simulador::odeCommandDone() {
+    emit commandDone();
 }
 
 void Simulador::pause() {
     ode->pauseOde();
     timer->stop();
+    emit commandDone();
 }
 
-void Simulador::stop() {
+void Simulador::stop(bool sendCommandDone) {
     timer->stop();
     ode->stopOde();
     ode->wait(3000);
     if(ode->isRunning()) {
         qWarning("Matando al thread");
     }
+    if(sendCommandDone)
+        emit commandDone();
 }
 
 void Simulador::reset() {
-    stop();
+    stop(DO_NOT_SEND_SIGNAL_WHEN_DONE);
 
-    while(!listaObjetoFisico.isEmpty())
-        delete listaObjetoFisico.takeFirst();
+    listaObjetoFisico.clear();
     delete ode;
 
     ode = new Ode(this);
+
     QTimer::singleShot(100, this, SLOT(timeout()));
+
+    while(!ode->isRunning()) ;
+    emit commandDone();
 
 }
 
@@ -104,7 +140,8 @@ void Simulador::paintEvent(QPaintEvent *) {
     p.scale(radio/10.0,radio/-10.0);
 
     for (int i = 0; i < listaObjetoFisico.size(); ++i) {
-        listaObjetoFisico[i]->pintar(&p);
+        if(listaObjetoFisico[i]->isOdeInit)
+            listaObjetoFisico[i]->pintar(&p);
     }
 
     p.end();

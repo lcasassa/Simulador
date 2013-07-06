@@ -26,7 +26,7 @@ public slots:
     void stopOde();
     void playOde();
     void pauseOde();
-    void stepOde(int steps_ = 1);
+    void stepOde(int steps_ = 1, bool stepEmitCommandDone = false);
 
 protected:
     void run();
@@ -34,13 +34,17 @@ protected:
     void unlockObjetosFisicos();
 
 private:
+    bool stepEmitCommandDone;
     Simulador *simulador;
     int status;
     QMutex statusMutex;
 
 signals:
-    
+    void results(int value);
+    void commandDone();
+
 public slots:
+
     
 };
 

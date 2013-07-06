@@ -10,7 +10,7 @@
 class RobotQuadrotor : public ObjetoFisico
 {
 public:
-    RobotQuadrotor();
+    RobotQuadrotor(ControlFuzzy *control_ = NULL);
     ~RobotQuadrotor();
 //    void setControl(Control *control_);
     void init(dWorldID *world, dSpaceID *space);
@@ -25,8 +25,10 @@ public:
     static bool key_right;
     static bool key_clock;
     static bool key_anticlock;
+    double getMinDistance();
 
 private:
+    double minDistance;
     void pintarCirculo(QPainter *p, int i);
     bool isSensorInfrarrojo(dGeomID o1);
     bool isGeom(dGeomID o1);
@@ -38,7 +40,8 @@ private:
     dMass m;
     float radio;
     float masa;
-//    Control *control;
+    Control *control;
+    bool deleteFizzyficacion;
 };
 
 #endif // ROBOTQUADROTOR_H

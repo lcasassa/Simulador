@@ -23,14 +23,11 @@ protected:
 private slots:
      void on_spinBoxLoopSleepUs_valueChanged(int arg1);
      void on_pushButtonStart_clicked();
-
      void on_spinBoxRefrescoHz_valueChanged(int arg1);
-
      void on_pushButtonReset_clicked();
-
      void on_pushButtonStep_clicked();
-
      void on_pushButtonStartTraining_clicked();
+     void trainerFinished();
 
 private:
     Ui::MainWindow *ui;
