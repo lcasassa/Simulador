@@ -9,8 +9,11 @@ bool RobotQuadrotor::key_clock = false;
 bool RobotQuadrotor::key_anticlock = false;
 
 
-RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_)
+RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, float posicionInicialY_)
 {
+    posicionInicialX = posicionInicialX_;
+    posicionInicialY = posicionInicialY_;
+
     radio = 0.3;
     masa = 1;
 
@@ -19,6 +22,9 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_)
             sensorInfrarrojo[i][j] = new SensorInfrarrojo(radio*5);
 
     minDistance = radio*5;
+
+    for(int i=0; i<4*4; i++)
+        distancia_old[i]=radio*5;
 
     control = control_;
 }
@@ -53,7 +59,7 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
     dGeomSetBody(geom[2], body);
     dGeomSetBody(geom[3], body);
     // set initial position
-    dBodySetPosition(body,0, 0, 0);
+    dBodySetPosition(body, posicionInicialX, posicionInicialY, 0);
 
     dGeomSetOffsetPosition( geom[0],  radio,  radio, 0);
     dGeomSetOffsetPosition( geom[1],  radio, -radio, 0);
@@ -90,6 +96,18 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
     ObjetoFisico::init(world, space);
 }
 
+void RobotQuadrotor::remove() {
+
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++)
+            sensorInfrarrojo[i][j]->remove();
+
+    for(int j=0; j<4; j++)
+        dGeomDestroy(geom[j]);
+
+    dBodyDestroy(body);
+}
+
 void RobotQuadrotor::odeLoop() {
     static int j=0;
 
@@ -97,7 +115,7 @@ void RobotQuadrotor::odeLoop() {
         for(int j=0; j<4; j++)
             sensorInfrarrojo[i][j]->odeLoop();
 
-    dBodyAddRelForce (body,  0.001, 0, 0);
+    //dBodyAddRelForce (body,  0.001, 0, 0);
 
     if(key_up)
         dBodyAddRelForce (body,  0.3,  0.0, 0);
@@ -112,12 +130,23 @@ void RobotQuadrotor::odeLoop() {
     if(key_anticlock)
         dBodyAddTorque (body,  0.0, 0.0,  0.1);
 
-    qreal salidas[3];
-    qreal distanciaDetectado[3];
-    distanciaDetectado[0] = sensorInfrarrojo[0][0]->distanciaDetectado;
-    if(control != NULL)
-        control->loopControl(distanciaDetectado, salidas);
-    dBodyAddRelForce (body, 0.01*salidas[0], 0.0, 0);
+
+    if(control != NULL) {
+        qreal distancia_[4*4];
+        qreal vel_[4*4];
+        qreal out_[2];
+
+        // 0 a 1
+        for(int i=0; i<4; i++)
+            for(int j=0; j<4; j++) {
+                distancia_[i*4+j] = ( sensorInfrarrojo[i][j]->distanciaDetectado - 0.3 ) / (0.3*5 - 0.3);
+                vel_[i*4+j] = distancia_old[i*4+j] - distancia_[i*4+j];
+                distancia_old[i*4+j] = distancia_[i*4+j];
+            }
+
+        control->loopControl(distancia_, vel_, out_);
+        dBodyAddRelForce (body, 0.01*out_[0], 0.01*out_[1], 0);
+    }
 
     // Roce
 //    dBodyAddRelForce (body, cos((j++%3141)/1000)*0.3, 0, 0);

@@ -9,7 +9,7 @@ Control::~Control() {
 
 }
 
-void Control::loopControl(qreal *distanciaDetectado, qreal *salidas) {
+void Control::loopControl(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]) {
 
 }
 

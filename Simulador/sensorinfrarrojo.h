@@ -8,6 +8,7 @@ class SensorInfrarrojo : public ObjetoFisico
 public:
     SensorInfrarrojo(dReal distanciaMaxDetector_, dReal posX_ = 0.0, dReal posY_ = 0.0, dReal thetaZ_ = 0.0);
     void init(dWorldID *world, dSpaceID *space);
+    void remove();
     void pintar(QPainter *p);
     void odeLoop();
     bool odeCollide(dGeomID o1, dGeomID o2);

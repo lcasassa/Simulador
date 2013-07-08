@@ -1,12 +1,15 @@
 #include "objetofisico.h"
 
-ObjetoFisico::ObjetoFisico()
-{
+ObjetoFisico::ObjetoFisico() {
     isOdeInit = false;
 }
 
-ObjetoFisico::~ObjetoFisico()
-{
+ObjetoFisico::~ObjetoFisico() {
+
+}
+
+void ObjetoFisico::remove() {
+
 }
 
 void ObjetoFisico::init(dWorldID *world, dSpaceID *space) {

@@ -10,7 +10,7 @@ class Control : public QWidget
 public:
     explicit Control(QWidget *parent = 0);
     virtual ~Control();
-    virtual void loopControl(qreal *distanciaDetectado, qreal *salidas);
+    virtual void loopControl(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]);
     virtual void pintar(QPainter *p);
 signals:
     

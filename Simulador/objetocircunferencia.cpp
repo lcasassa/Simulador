@@ -29,6 +29,10 @@ void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
     ObjetoFisico::init(world, space);
 }
 
+void ObjetoCircunferencia::remove() {
+    dGeomDestroy(geom);
+    dBodyDestroy(body);
+}
 
 void ObjetoCircunferencia::pintar(QPainter *p) {
     const dReal *pos;

@@ -16,6 +16,10 @@ void SensorInfrarrojo::init(dWorldID *world, dSpaceID *space) {
 //    dGeomSetRotation(geom,R);
 }
 
+void SensorInfrarrojo::remove() {
+    dGeomDestroy(geom);
+}
+
 void SensorInfrarrojo::setPose(dReal x, dReal y, dReal z, dReal dx, dReal dy, dReal dz) {
 //    qWarning("SensorInfrarrojo::setPose(%f, %f,%f, %f, %f, %f)", x, y, z, dx, dy, dz);
     dGeomRaySet (geom, x,y,z, dx,dy,dz);

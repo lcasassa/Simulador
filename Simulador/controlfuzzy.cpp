@@ -13,12 +13,8 @@ ControlFuzzy::~ControlFuzzy() {
 
 }
 
-void ControlFuzzy::loopControl(qreal *distanciaDetectado, qreal *salidas) {
-//    salidas[0] = distanciaDetectado[0] - 1.0;
-    static int i = 0;
-    if(i<10) { i++; return; }
-    fuzzyficacion->evaluar(distanciaDetectado, salidas);
-//    qWarning("i:%f o:%f", distanciaDetectado[0], salidas[0]);
+void ControlFuzzy::loopControl(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]) {
+    fuzzyficacion->evaluar(distancia_, vel_, out_);
 }
 
 void ControlFuzzy::pintar(QPainter *p) {

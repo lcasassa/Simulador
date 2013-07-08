@@ -22,6 +22,7 @@ public:
     void setRefrescoHz(int refrescoHz);
 
     QList<ObjetoFisico*> listaObjetoFisico;
+    QMutex listaObjetoFisicoMutex;
     Ode *ode;
     Trainer *trainer;
 

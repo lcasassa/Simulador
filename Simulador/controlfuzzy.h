@@ -10,9 +10,8 @@ class ControlFuzzy : public Control
 public:
     explicit ControlFuzzy(Fuzzyficacion *fuzzyficacion_, QWidget *parent = 0);
     ~ControlFuzzy();
-    void loopControl(qreal *distanciaDetectado, qreal *salidas);
+    void loopControl(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]);
     void pintar(QPainter *p);
-    void evaluar(qreal *distanciaDetectado, qreal *salidas);
     
 signals:
     

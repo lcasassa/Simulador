@@ -10,10 +10,11 @@
 class RobotQuadrotor : public ObjetoFisico
 {
 public:
-    RobotQuadrotor(ControlFuzzy *control_ = NULL);
+    RobotQuadrotor(ControlFuzzy *control_ = NULL, float posicionInicialX_ = 0, float posicionInicialY_ = 0);
     ~RobotQuadrotor();
 //    void setControl(Control *control_);
     void init(dWorldID *world, dSpaceID *space);
+    void remove();
     void pintar(QPainter *p);
     void odeLoop();
     void lock();
@@ -34,6 +35,7 @@ private:
     bool isGeom(dGeomID o1);
 //    ObjetoCircunferencia *objetoCircunferencia[4];
     SensorInfrarrojo *sensorInfrarrojo[4][4];
+    qreal distancia_old[4*4];
 //    dJointID    joint[3];
     dBodyID body;
     dGeomID geom[4];
@@ -42,6 +44,8 @@ private:
     float masa;
     Control *control;
     bool deleteFizzyficacion;
+    float posicionInicialX;
+    float posicionInicialY;
 };
 
 #endif // ROBOTQUADROTOR_H

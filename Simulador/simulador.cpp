@@ -39,7 +39,9 @@ Simulador::Simulador(QWidget *parent) :
 Simulador::~Simulador() {
     stop();
 
+    listaObjetoFisicoMutex.lock();
     listaObjetoFisico.clear();
+    listaObjetoFisicoMutex.unlock();
 
     delete ode;
     delete timer;
@@ -54,14 +56,19 @@ void Simulador::timeout() {
 }
 
 void Simulador::registrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
+    listaObjetoFisicoMutex.lock();
     listaObjetoFisico.append(objetoFisico);
+    listaObjetoFisicoMutex.unlock();
     if(sendCommandDone)
         emit commandDone();
 
 }
 
 void Simulador::desregistrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
+    listaObjetoFisicoMutex.lock();
+    objetoFisico->remove();
     listaObjetoFisico.removeOne(objetoFisico);
+    listaObjetoFisicoMutex.unlock();
     if(sendCommandDone)
         emit commandDone();
 }
@@ -113,7 +120,9 @@ void Simulador::stop(bool sendCommandDone) {
 void Simulador::reset() {
     stop(DO_NOT_SEND_SIGNAL_WHEN_DONE);
 
+    listaObjetoFisicoMutex.lock();
     listaObjetoFisico.clear();
+    listaObjetoFisicoMutex.unlock();
     delete ode;
 
     ode = new Ode(this);
@@ -139,10 +148,12 @@ void Simulador::paintEvent(QPaintEvent *) {
     p.translate(radio/2,radio/2);
     p.scale(radio/10.0,radio/-10.0);
 
+    listaObjetoFisicoMutex.lock();
     for (int i = 0; i < listaObjetoFisico.size(); ++i) {
         if(listaObjetoFisico[i]->isOdeInit)
             listaObjetoFisico[i]->pintar(&p);
     }
+    listaObjetoFisicoMutex.unlock();
 
     p.end();
 

@@ -73,7 +73,7 @@ void Trainer::step(int value) {
 void Trainer::registrarObjeto(ObjetoFisico * objetoFisico) {
     emit registrarObjetoSimulador(objetoFisico);
     odeCommandWaitCondition.wait(&odeCommandMutex);
-#ifdef DEBUG_TRAINER
+#ifdef DEBUG_TRAINER2
     qWarning("Trainer: registrarObjeto OK");
 #endif
 }
@@ -81,7 +81,7 @@ void Trainer::registrarObjeto(ObjetoFisico * objetoFisico) {
 void Trainer::desregistrarObjeto(ObjetoFisico * objetoFisico) {
     emit desregistrarObjetoSimulador(objetoFisico);
     odeCommandWaitCondition.wait(&odeCommandMutex);
-#ifdef DEBUG_TRAINER
+#ifdef DEBUG_TRAINER2
     qWarning("Trainer: desregistrarObjeto OK");
 #endif
 }

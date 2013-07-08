@@ -116,7 +116,6 @@ void Ode::run() {
         }
 
         lockObjetosFisicos();
-
         for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
             if(!simulador->listaObjetoFisico[i]->isOdeInit)
                 simulador->listaObjetoFisico[i]->init(&world, &space);
@@ -153,6 +152,7 @@ void Ode::run() {
 }
 
 void Ode::lockObjetosFisicos() {
+    simulador->listaObjetoFisicoMutex.lock();
     for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
         simulador->listaObjetoFisico[i]->lock();
     }
@@ -162,12 +162,14 @@ void Ode::unlockObjetosFisicos() {
     for (int i = 0; i < simulador->listaObjetoFisico.size(); ++i) {
         simulador->listaObjetoFisico[i]->unlock();
     }
+    simulador->listaObjetoFisicoMutex.unlock();
 }
 
 void Ode::nearCallback (void *data, dGeomID o1, dGeomID o2)
 {
     for (int i = 0; i < sim->listaObjetoFisico.size(); ++i) {
-        if(sim->listaObjetoFisico[i]->odeCollide(o1, o2)) return;
+        if(sim->listaObjetoFisico[i]->odeCollide(o1, o2))
+            return;
     }
 
     dBodyID b1 = dGeomGetBody(o1);
