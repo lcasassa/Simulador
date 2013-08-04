@@ -5,52 +5,65 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
     QObject(parent)
 {
 
-    model = new fl::FuzzyEngine("", fl::FuzzyOperator::DefaultFuzzyOperator());
 
-    distance = new fl::InputLVar("Distancia");
-    distance->addTerm(new fl::ShoulderTerm("CERCA",  0.00, 0.50, true));
-    distance->addTerm(new fl::TriangularTerm("PRUDENTE", 0.25, 0.75));
-    distance->addTerm(new fl::ShoulderTerm("LEJOS",  0.55, 1.00, false));
-    model->addInputLVar(distance);
+    engine = new fl::Engine;
+    engine->setName("simple-dimmer");
+    engine->addHedge(new fl::Any);
+    engine->addHedge(new fl::Extremely);
+    engine->addHedge(new fl::Not);
+    engine->addHedge(new fl::Seldom);
+    engine->addHedge(new fl::Somewhat);
+    engine->addHedge(new fl::Very);
 
-    vel = new fl::InputLVar("Velocidad");
-    vel->addTerm(new fl::ShoulderTerm("ACERCANDOSE", -1.00, -0.25, true));
-    vel->addTerm(new fl::TriangularTerm("QUIETO",    -0.50,  0.50));
-    vel->addTerm(new fl::ShoulderTerm("ALEJANDOSE",   0.25,  1.00, false));
-    model->addInputLVar(vel);
+    distancia = new fl::InputVariable;
+    distancia->setName("Distancia");
+    distancia->setRange(0.000, 1.000);
+    distancia->addTerm(new fl::Triangle("CERCA",    0.00, 0.00, 0.50));
+    distancia->addTerm(new fl::Triangle("PRUDENTE", 0.25, 0.50, 0.75));
+    distancia->addTerm(new fl::Triangle("LEJOS",    0.55, 1.00, 1.00));
+    engine->addInputVariable(distancia);
 
-    out = new fl::OutputLVar("Salida");
-    out->addTerm(new fl::TriangularTerm("ALEJATE_MUCHO", -2.00, -0.00));
-    out->addTerm(new fl::TriangularTerm("ALEJATE",       -1.00, -0.00));
-    out->addTerm(new fl::TriangularTerm("NADA",          -0.50,  0.50));
-    out->addTerm(new fl::TriangularTerm("ACERCATE",       0.00,  1.00));
-    model->addOutputLVar(out);
+    vel = new fl::InputVariable;
+    vel->setName("Velocidad");
+    vel->setRange(-1.000, 1.000);
+    vel->addTerm(new fl::Triangle("ACERCANDOSE", -1.00, -1.00, -0.25));
+    vel->addTerm(new fl::Triangle("QUIETO",      -0.50,  0.00,  0.50));
+    vel->addTerm(new fl::Triangle("ALEJANDOSE",   0.25,  1.00,  1.00));
+    engine->addInputVariable(vel);
 
-    fl::MamdaniRule* rule[9];
-    for(int i=0; i<9; i++)
-        rule[i] = new fl::MamdaniRule();
 
-    {
-    int i=0;
-    rule[i++]->parse("if Distancia is CERCA    and Velocidad is ACERCANDOSE then Salida is ALEJATE_MUCHO", *model);
-    rule[i++]->parse("if Distancia is CERCA    and Velocidad is QUIETO      then Salida is ALEJATE_MUCHO", *model);
-    rule[i++]->parse("if Distancia is CERCA    and Velocidad is ALEJANDOSE  then Salida is ALEJATE",       *model);
 
-    rule[i++]->parse("if Distancia is PRUDENTE and Velocidad is ACERCANDOSE then Salida is ALEJATE_MUCHO", *model);
-    rule[i++]->parse("if Distancia is PRUDENTE and Velocidad is ALEJANDOSE  then Salida is ACERCATE",      *model);
-    rule[i++]->parse("if Distancia is PRUDENTE and Velocidad is QUIETO      then Salida is ALEJATE",       *model);
+    out = new fl::OutputVariable;
+    out->setName("Salida");
+    out->setRange(-2.000, 1.000);
+    out->setLockOutputRange(false);
+    out->setDefaultValue(fl::nan);
+    out->setLockValidOutput(false);
+    out->setDefuzzifier(new fl::Centroid(500));
+    out->output()->setAccumulation(new fl::Maximum);
 
-    rule[i++]->parse("if Distancia is LEJOS    and Velocidad is ACERCANDOSE then Salida is ALEJATE",       *model);
-    rule[i++]->parse("if Distancia is LEJOS    and Velocidad is ALEJANDOSE  then Salida is NADA",          *model);
-    rule[i++]->parse("if Distancia is LEJOS    and Velocidad is QUIETO      then Salida is NADA",          *model);
-    }
+    out->addTerm(new fl::Triangle("ALEJATE_MUCHO", -2.000, -1.000, 0.000));
+    out->addTerm(new fl::Triangle("ALEJATE",       -1.000, -0.500, 0.000));
+    out->addTerm(new fl::Triangle("NADA",          -0.500,  0.000, 0.500));
+    out->addTerm(new fl::Triangle("ACERCATE",       0.000,  0.500, 1.000));
+    engine->addOutputVariable(out);
 
-    fl::RuleBlock* ruleblock = new fl::RuleBlock("Rules");
+    fl::RuleBlock* ruleblock1 = new fl::RuleBlock;
+    ruleblock1->setName("");
+    ruleblock1->setTnorm(new fl::Minimum);
+    ruleblock1->setSnorm(new fl::Maximum);
+    ruleblock1->setActivation(new fl::Minimum);
 
-    for(int i=0; i<9; i++)
-        ruleblock->addRule(rule[i]);
-
-    model->addRuleBlock(ruleblock);
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is CERCA    and Velocidad is ACERCANDOSE then Salida is ALEJATE_MUCHO", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is CERCA    and Velocidad is QUIETO      then Salida is ALEJATE_MUCHO", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is CERCA    and Velocidad is ALEJANDOSE  then Salida is ALEJATE", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is PRUDENTE and Velocidad is ACERCANDOSE then Salida is ALEJATE_MUCHO", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is PRUDENTE and Velocidad is ALEJANDOSE  then Salida is ACERCATE", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is PRUDENTE and Velocidad is QUIETO      then Salida is ALEJATE", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is LEJOS    and Velocidad is ACERCANDOSE then Salida is ALEJATE", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is LEJOS    and Velocidad is ALEJANDOSE  then Salida is NADA", engine));
+    ruleblock1->addRule(fl::FuzzyRule::parse("if Distancia is LEJOS    and Velocidad is QUIETO      then Salida is NADA", engine));
+    engine->addRuleBlock(ruleblock1);
 
     /*
     fl::flScalar in;
@@ -67,6 +80,9 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
 */
 
 }
+
+
+
 
 
 /* Entrada[4*4]
@@ -117,11 +133,15 @@ void Fuzzyficacion::evaluar(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2
     out_[1] -= 2*fuzzyfica(distancia_[14], vel_[14])*sin(30.0*M_PI/180.0);
 }
 
-float Fuzzyficacion::fuzzyfica(float distance_, float vel_) {
-    distance->setInput(distance_);
+float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
+    distancia->setInput(distancia_);
     vel->setInput(vel_);
-    model->process();
-    return out->output().defuzzify();
+    engine->process();
+    float output = out->defuzzify();
+    if(isnan(output))
+        return 0;
+    else
+        return output;
 }
 
 Fuzzyficacion::~Fuzzyficacion() {

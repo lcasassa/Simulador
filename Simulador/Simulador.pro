@@ -12,8 +12,8 @@ TEMPLATE = app
 QMAKE_CXXFLAGS += -O0
 QMAKE_LFLAGS += -O0
 
-INCLUDEPATH += ../fuzzylite
-LIBS += -L../fuzzylite/unix-static -lfuzzylite
+INCLUDEPATH += ../../fuzzylite/src/fuzzylite/
+LIBS += -L../../fuzzylite/ -lfuzzylite
 
 SOURCES += main.cpp\
     mainwindow.cpp \
