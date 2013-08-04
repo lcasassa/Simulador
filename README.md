@@ -7,13 +7,19 @@ Simulador
 No hagas "sudo apt-get install libode-dev" porque instala la version 0.11.1.
 
 sudo apt-get install automake
+
 sudo apt-get install libtool
 
 http://sourceforge.net/projects/opende/files/ODE/0.12/ode-0.12.tar.bz2/download
+
 tar xjf ode-0.12.tar.bz2
+
 cd ode-0.12
+
 sh autogen.sh
+
 ./configure --enable-double-precision --prefix=$(PWD)/install
+
 make
 
 2) Instalar fuzzylight
