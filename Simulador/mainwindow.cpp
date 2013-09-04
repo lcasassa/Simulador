@@ -54,7 +54,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
 
-    ui->simuladorWidget->ode->sleepTime = ui->spinBoxLoopSleepUs->value();
+    int la = ui->spinBoxLoopSleepUs->value();
+    ui->simuladorWidget->ode->sleepTime = la;
     ui->simuladorWidget->setRefrescoHz( ui->spinBoxRefrescoHz->value() );
     connect(ui->simuladorWidget->trainer, SIGNAL(finished()), this, SLOT(trainerFinished()));
 }

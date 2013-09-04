@@ -3,11 +3,18 @@
 
 #include <QObject>
 #include <QList>
+#include <QByteArray>
 //#include "areatriangular.h"
 
 //#include <ode/ode.h>
 #include <fl/Headers.h>
 
+struct fuzzy {
+    double input1[3][2];
+    double input2[3][2];
+    double output[4][2];
+
+};
 
 class Fuzzyficacion : public QObject
 {
@@ -16,7 +23,9 @@ public:
     explicit Fuzzyficacion(QObject *parent = 0);
     void evaluar(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]);
     float fuzzyfica(float distancia_, float vel_);
+    void setFuzzy(QByteArray b);
     ~Fuzzyficacion();
+    static QByteArray serialize(struct fuzzy f);
 //    void pintar(QPainter *p);
 //    void addAreaTriangular(QString nombre_, qreal base1_, qreal base2_, qreal punta_);
 //    void addAreaTriangular(QString nombre_, qreal base1_, qreal base2_);

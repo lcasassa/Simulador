@@ -6,6 +6,80 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
 {
 
 
+}
+
+/*
+f.input1[0][0] = 0.00;
+f.input1[0][1] = 0.50;
+f.input1[1][0] = 0.25;
+f.input1[1][1] = 0.75;
+f.input1[2][0] = 0.50;
+f.input1[2][1] = 1.00;
+
+f.input2[0][0] = -1.00;
+f.input2[0][1] = -0.25;
+f.input2[1][0] = -0.50;
+f.input2[1][1] =  0.50;
+f.input2[2][0] =  0.25;
+f.input2[2][1] =  1.00;
+
+f.output[0][0] = -2.00;
+f.output[0][1] =  0.00;
+f.output[1][0] = -1.00;
+f.output[1][1] =  0.00;
+f.output[2][0] = -0.50;
+f.output[2][1] =  0.50;
+f.output[3][0] =  0.00;
+f.output[3][1] =  1.00;
+*/
+
+QByteArray Fuzzyficacion::serialize(struct fuzzy f) {
+    QByteArray b;
+    QDataStream d(&b, QIODevice::WriteOnly);
+    double *df = (double *)&f;
+    for(unsigned int i=0; i < sizeof(struct fuzzy) / sizeof(double); i++) {
+        double value = df[i];
+        d << value;
+    }
+    return b;
+}
+
+void Fuzzyficacion::setFuzzy(QByteArray b) {
+
+    QDataStream d(b);
+    struct fuzzy f;
+    double *df = (double *)&f;
+    for(unsigned int i=0; i < sizeof(struct fuzzy) / sizeof(double); i++) {
+        double value;
+        d >> value;
+        df[i] = value;
+    }
+/*
+    struct fuzzy f;
+    f.input1[0][0] = 0.00;
+    f.input1[0][1] = 0.50;
+    f.input1[1][0] = 0.25;
+    f.input1[1][1] = 0.75;
+    f.input1[2][0] = 0.50;
+    f.input1[2][1] = 1.00;
+
+    f.input2[0][0] = -1.00;
+    f.input2[0][1] = -0.25;
+    f.input2[1][0] = -0.50;
+    f.input2[1][1] =  0.50;
+    f.input2[2][0] =  0.25;
+    f.input2[2][1] =  1.00;
+
+    f.output[0][0] = -2.00;
+    f.output[0][1] =  0.00;
+    f.output[1][0] = -1.00;
+    f.output[1][1] =  0.00;
+    f.output[2][0] = -0.50;
+    f.output[2][1] =  0.50;
+    f.output[3][0] =  0.00;
+    f.output[3][1] =  1.00;
+*/
+
     engine = new fl::Engine;
     engine->setName("simple-dimmer");
     engine->addHedge(new fl::Any);
@@ -18,17 +92,17 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
     distancia = new fl::InputVariable;
     distancia->setName("Distancia");
     distancia->setRange(0.000, 1.000);
-    distancia->addTerm(new fl::Triangle("CERCA",    0.00, 0.00, 0.50));
-    distancia->addTerm(new fl::Triangle("PRUDENTE", 0.25, 0.50, 0.75));
-    distancia->addTerm(new fl::Triangle("LEJOS",    0.55, 1.00, 1.00));
+    distancia->addTerm(new fl::Triangle("CERCA",    f.input1[0][0], f.input1[0][0], f.input1[0][1]));
+    distancia->addTerm(new fl::Triangle("PRUDENTE", f.input1[1][0], (f.input1[1][0] + f.input1[1][2]) / 2, f.input1[1][1]));
+    distancia->addTerm(new fl::Triangle("LEJOS",    f.input1[2][0], f.input1[2][1], f.input1[2][1]));
     engine->addInputVariable(distancia);
 
     vel = new fl::InputVariable;
     vel->setName("Velocidad");
     vel->setRange(-1.000, 1.000);
-    vel->addTerm(new fl::Triangle("ACERCANDOSE", -1.00, -1.00, -0.25));
-    vel->addTerm(new fl::Triangle("QUIETO",      -0.50,  0.00,  0.50));
-    vel->addTerm(new fl::Triangle("ALEJANDOSE",   0.25,  1.00,  1.00));
+    vel->addTerm(new fl::Triangle("ACERCANDOSE", f.input2[0][0], f.input2[0][0], f.input2[0][1]));
+    vel->addTerm(new fl::Triangle("QUIETO",      f.input2[1][0], (f.input2[1][0] + f.input2[1][2]) / 2, f.input2[1][1]));
+    vel->addTerm(new fl::Triangle("ALEJANDOSE",  f.input2[2][0], f.input2[2][1], f.input2[2][1]));
     engine->addInputVariable(vel);
 
 
@@ -42,10 +116,10 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
     out->setDefuzzifier(new fl::Centroid(500));
     out->output()->setAccumulation(new fl::Maximum);
 
-    out->addTerm(new fl::Triangle("ALEJATE_MUCHO", -2.000, -1.000, 0.000));
-    out->addTerm(new fl::Triangle("ALEJATE",       -1.000, -0.500, 0.000));
-    out->addTerm(new fl::Triangle("NADA",          -0.500,  0.000, 0.500));
-    out->addTerm(new fl::Triangle("ACERCATE",       0.000,  0.500, 1.000));
+    out->addTerm(new fl::Triangle("ALEJATE_MUCHO", f.output[0][0], (f.output[0][0] + f.output[0][1]) / 2, f.output[0][1]));
+    out->addTerm(new fl::Triangle("ALEJATE",       f.output[1][0], (f.output[1][0] + f.output[1][1]) / 2, f.output[1][1]));
+    out->addTerm(new fl::Triangle("NADA",          f.output[2][0], (f.output[2][0] + f.output[2][1]) / 2, f.output[2][1]));
+    out->addTerm(new fl::Triangle("ACERCATE",      f.output[3][0], (f.output[3][0] + f.output[3][1]) / 2, f.output[3][1]));
     engine->addOutputVariable(out);
 
     fl::RuleBlock* ruleblock1 = new fl::RuleBlock;
@@ -79,6 +153,7 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
     }
 */
 
+
 }
 
 
@@ -104,6 +179,77 @@ Fuzzyficacion::Fuzzyficacion(QObject *parent) :
  *           ------> salida[0]
  */
 void Fuzzyficacion::evaluar(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]) {
+/*
+    out_[0] = 0;
+    out_[1] = 0;
+
+    qreal x[2] = { 1,1 };
+    x[0] *= distancia_[ 0]*cos( 0.0 * M_PI_2/180.0);
+    x[0] *= distancia_[ 1]*cos(30.0 * M_PI_2/180.0);
+    x[0] *= distancia_[ 2]*cos(60.0 * M_PI_2/180.0);
+    x[0] *= distancia_[15]*cos( 0.0 * M_PI_2/180.0);
+    x[0] *= distancia_[14]*cos(30.0 * M_PI_2/180.0);
+    x[0] *= distancia_[13]*cos(60.0 * M_PI_2/180.0);
+
+    x[1] *= distancia_[ 7]*cos( 0.0 * M_PI_2/180.0);
+    x[1] *= distancia_[ 6]*cos(30.0 * M_PI_2/180.0);
+    x[1] *= distancia_[ 5]*cos(60.0 * M_PI_2/180.0);
+    x[1] *= distancia_[ 8]*cos( 0.0 * M_PI_2/180.0);
+    x[1] *= distancia_[ 9]*cos(30.0 * M_PI_2/180.0);
+    x[1] *= distancia_[10]*cos(60.0 * M_PI_2/180.0);
+
+    qreal vx[2] = { 1,1 };
+    vx[0] *= vel_[ 0]*cos( 0.0 * M_PI_2/180.0);
+    vx[0] *= vel_[ 1]*cos(30.0 * M_PI_2/180.0);
+    vx[0] *= vel_[ 2]*cos(60.0 * M_PI_2/180.0);
+    vx[0] *= vel_[15]*cos( 0.0 * M_PI_2/180.0);
+    vx[0] *= vel_[14]*cos(30.0 * M_PI_2/180.0);
+    vx[0] *= vel_[13]*cos(60.0 * M_PI_2/180.0);
+
+    vx[1] *= vel_[ 7]*cos( 0.0 * M_PI_2/180.0);
+    vx[1] *= vel_[ 6]*cos(30.0 * M_PI_2/180.0);
+    vx[1] *= vel_[ 5]*cos(60.0 * M_PI_2/180.0);
+    vx[1] *= vel_[ 8]*cos( 0.0 * M_PI_2/180.0);
+    vx[1] *= vel_[ 9]*cos(30.0 * M_PI_2/180.0);
+    vx[1] *= vel_[10]*cos(60.0 * M_PI_2/180.0);
+
+    out_[0] += fuzzyfica(x[0], vx[0]);
+    out_[0] -= fuzzyfica(x[1], vx[1]);
+
+
+    qreal y[2] = { 1,1 };
+    y[0] *= distancia_[ 3]*cos( 0.0 * M_PI_2/180.0);
+    y[0] *= distancia_[ 2]*cos(30.0 * M_PI_2/180.0);
+    y[0] *= distancia_[ 1]*cos(60.0 * M_PI_2/180.0);
+    y[0] *= distancia_[ 4]*cos( 0.0 * M_PI_2/180.0);
+    y[0] *= distancia_[ 5]*cos(30.0 * M_PI_2/180.0);
+    y[0] *= distancia_[ 6]*cos(60.0 * M_PI_2/180.0);
+
+    y[1] *= distancia_[12]*cos( 0.0 * M_PI_2/180.0);
+    y[1] *= distancia_[13]*cos(30.0 * M_PI_2/180.0);
+    y[1] *= distancia_[14]*cos(60.0 * M_PI_2/180.0);
+    y[1] *= distancia_[11]*cos( 0.0 * M_PI_2/180.0);
+    y[1] *= distancia_[10]*cos(30.0 * M_PI_2/180.0);
+    y[1] *= distancia_[ 9]*cos(60.0 * M_PI_2/180.0);
+
+    qreal vy[2] = { 1,1 };
+    vy[0] *= vel_[ 3]*cos( 0.0 * M_PI_2/180.0);
+    vy[0] *= vel_[ 2]*cos(30.0 * M_PI_2/180.0);
+    vy[0] *= vel_[ 1]*cos(60.0 * M_PI_2/180.0);
+    vy[0] *= vel_[ 4]*cos( 0.0 * M_PI_2/180.0);
+    vy[0] *= vel_[ 5]*cos(30.0 * M_PI_2/180.0);
+    vy[0] *= vel_[ 6]*cos(60.0 * M_PI_2/180.0);
+
+    vy[1] *= vel_[12]*cos( 0.0 * M_PI_2/180.0);
+    vy[1] *= vel_[13]*cos(30.0 * M_PI_2/180.0);
+    vy[1] *= vel_[14]*cos(60.0 * M_PI_2/180.0);
+    vy[1] *= vel_[11]*cos( 0.0 * M_PI_2/180.0);
+    vy[1] *= vel_[10]*cos(30.0 * M_PI_2/180.0);
+    vy[1] *= vel_[ 9]*cos(60.0 * M_PI_2/180.0);
+
+    out_[1] += fuzzyfica(y[0], vy[0]);
+    out_[1] -= fuzzyfica(y[1], vy[1]);
+*/
     out_[0]  = 0;
     out_[0] += 2*fuzzyfica(distancia_[ 0], vel_[ 0]);
     out_[0] += 2*fuzzyfica(distancia_[ 1], vel_[ 1])*cos(30.0*M_PI/180.0);
@@ -131,9 +277,13 @@ void Fuzzyficacion::evaluar(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2
     out_[1] -= 2*fuzzyfica(distancia_[12], vel_[12]);
     out_[1] -= 2*fuzzyfica(distancia_[13], vel_[13])*sin(60.0*M_PI/180.0);
     out_[1] -= 2*fuzzyfica(distancia_[14], vel_[14])*sin(30.0*M_PI/180.0);
+
 }
 
 float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
+    if(distancia == NULL || vel == NULL || engine == NULL)
+        return 0;
+
     distancia->setInput(distancia_);
     vel->setInput(vel_);
     engine->process();
@@ -145,6 +295,7 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
 }
 
 Fuzzyficacion::~Fuzzyficacion() {
+    delete engine;
 /*    for(int i=0; i<areaTriangular.size(); i++) {
         delete areaTriangular[i];
     }*/

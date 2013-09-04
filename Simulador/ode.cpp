@@ -137,8 +137,9 @@ void Ode::run() {
 
         unlockObjetosFisicos();
 
+        int la = sleepTime;
         if(sleepTime != 0)
-            this->usleep(sleepTime);
+            this->usleep(la);
 
         //qWarning("ode loop");
     }
