@@ -62,7 +62,7 @@ void TrainerAlgoritmoGenetico::run() {
             QPointer<RobotQuadrotor> quad = new RobotQuadrotor(control);
             registrarObjeto(quad);
 
-            play(60);
+            play(180);
             //step(1000);
             //sleep(15);
             //    pause();

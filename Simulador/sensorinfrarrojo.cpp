@@ -2,9 +2,13 @@
 #include <ode/ode.h>
 #include "ode.h"
 
+int SensorInfrarrojo::idCount = 0;
+
 SensorInfrarrojo::SensorInfrarrojo(dReal distanciaMaxDetector_, dReal posX_, dReal posY_, dReal thetaZ_)
 {
+    id = idCount++;
     distanciaMaxDetector = distanciaMaxDetector_;
+    distancia = distanciaMaxDetector;
     posX = posX_;
     posY = posY_;
     thetaZ = thetaZ_;
@@ -54,7 +58,6 @@ void SensorInfrarrojo::odeLoop() {
         bodyDetected[1] = plus[1];
         bodyDetected[2] = plus[2];
     }
-
 
     prom = prom + (distancia - prom)*0.2;
 

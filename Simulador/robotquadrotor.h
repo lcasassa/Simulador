@@ -28,13 +28,14 @@ public:
     static bool key_anticlock;
     double getMinDistance();
     double getPromDistance();
+    double getSumG();
 
 private:
     double minDistance;
     double promDistance;
     double promDistanceTotal;
     double prom;
-    double gx, gy, sumgx, sumgy;
+    double sumg;
     double elapsedTime_old;
     void pintarCirculo(QPainter *p, int i);
     bool isSensorInfrarrojo(dGeomID o1);

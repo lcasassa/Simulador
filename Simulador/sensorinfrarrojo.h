@@ -33,6 +33,8 @@ private:
     dReal posY;
     dReal thetaZ;
     dReal prom;
+    static int idCount;
+    int id;
 };
 
 #endif // SENSORINFRARROJO_H

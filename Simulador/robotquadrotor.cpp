@@ -32,8 +32,7 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
 
     prom = 0;
     promDistanceTotal = 0;
-    sumgx = 0;
-    sumgy = 0;
+    sumg = 0;
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -42,27 +41,6 @@ RobotQuadrotor::~RobotQuadrotor() {
         for(int j=0; j<4; j++)
             delete sensorInfrarrojo[i][j];
 
-}
-
-double RobotQuadrotor::getMinDistance() {
-    return minDistance - 0.3; // radio of the circles
-}
-
-double RobotQuadrotor::getPromDistance() {
-    /*
-    double prom = 0.0;
-
-    for(int i=0; i<4; i++)
-        for(int j=0; j<4; j++)
-            prom += sensorInfrarrojo[i][j]->getProm();
-
-    return prom / (4.0*4.0);
-    */
-
-    //return prom
-    return sumgx;
-
-    //return promDistance - 0.3; // radio of the circles
 }
 
 void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
@@ -119,8 +97,7 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
 
     prom = 0;
     promDistanceTotal = 0;
-    sumgx = 0;
-    sumgy = 0;
+    sumg = 0;
 
     ObjetoFisico::init(world, space);
 }
@@ -193,35 +170,54 @@ void RobotQuadrotor::odeLoop() {
     dBodyAddTorque (body, -roce*w[0]*2, -roce*w[1]*2, -roce*w[2]*2);
 
 
-    double smallestDistance = radio*5;
-    for(int i=0; i<4; i++)
-        for(int j=0; j<4; j++) {
-            if(distancia_old[i*4+j] < 1e-10)
-                continue;
-            if (distancia_old[i*4+j] < smallestDistance)
-                smallestDistance = distancia_old[i*4+j];
-        }
-
     double sum=0;
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
-            sum += distancia_old[i*4+j];
+            sum += (double)distancia_old[i*4+j];
     promDistanceTotal = promDistanceTotal + (sum - promDistanceTotal)*0.2;
 
     const dReal *a;
     a = dBodyGetForce(body);
 
-//    static int count = 0;
-//    if(count++%100==0)
-//        qWarning("%f %f %f", elapsedTime, a[0], a[1]);
-    //gx = a[0];
-    //gy = a[1];
-    sumgx += a[0];
-    sumgy += a[1];
+    sumg += a[0] + a[1];
 
-    prom = prom + (smallestDistance - prom)*0.2;
+    //prom = prom + ( - prom)*0.2;
+
+
+    //if(distance < 1e-10)
+    //    return true;
+
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++)
+            if(minDistance > (double)distancia_old[i*4+j])
+                minDistance = (double)distancia_old[i*4+j];
 
 }
+
+double RobotQuadrotor::getSumG() {
+    return sumg;
+}
+
+double RobotQuadrotor::getMinDistance() {
+    return minDistance - 0.3; // radio of the circles
+}
+
+double RobotQuadrotor::getPromDistance() {
+    /*
+    double prom = 0.0;
+
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++)
+            prom += sensorInfrarrojo[i][j]->getProm();
+
+    return prom / (4.0*4.0);
+    */
+
+    return promDistanceTotal;
+
+    //return promDistance - 0.3; // radio of the circles
+}
+
 
 void RobotQuadrotor::pintarCirculo(QPainter *p, int i) {
     const dReal *pos;
@@ -322,29 +318,8 @@ bool RobotQuadrotor::odeCollide(dGeomID o1, dGeomID o2) {
 
     for(int i=0; i<4; i++)
         for(int j=0; j<4 ; j++)
-            if(sensorInfrarrojo[i][j]->odeCollide(o1, o2)) {
-                double distance = sensorInfrarrojo[i][j]->getDistancia();
-
-                if(distance < 1e-10)
-                    return true;
-
-                double deltaTime = elapsedTime - elapsedTime_old;
-                elapsedTime_old = elapsedTime;
-
-                if(minDistance > distance)
-                    minDistance = distance;
-
-                float alfa = 0.2;
-                if(promDistance<0)
-                    promDistance = distance;
-                promDistance = promDistance + (distance - promDistance)*alfa;
-                for(double i=0; i<deltaTime; i+=0.01)
-                    promDistance = promDistance + (radio*5 - promDistance)*alfa;
-
-                //qWarning("prom: %f distance %f minDistance %f deltaTime %f", promDistance, distance, minDistance, deltaTime);
-
+            if(sensorInfrarrojo[i][j]->odeCollide(o1, o2))
                 return true;
-            }
 
     return false;
 }
