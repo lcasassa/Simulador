@@ -24,7 +24,7 @@ Simulador::Simulador(QWidget *parent) :
 #endif
     trainer = new TrainerAlgoritmoGenetico(this);
 
-    connect(trainer, SIGNAL(playOde()),  this, SLOT(play()));
+    connect(trainer, SIGNAL(playOde(double)),  this, SLOT(play(double)));
     connect(trainer, SIGNAL(stopOde()),  this, SLOT(stop()));
     connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()));
     connect(trainer, SIGNAL(pauseOde()), this, SLOT(pause()));
@@ -32,7 +32,26 @@ Simulador::Simulador(QWidget *parent) :
     connect(trainer, SIGNAL(registrarObjetoSimulador(ObjetoFisico*)), this, SLOT(registrarObjeto(ObjetoFisico*)));
     connect(trainer, SIGNAL(desregistrarObjetoSimulador(ObjetoFisico*)), this, SLOT(desregistrarObjeto(ObjetoFisico*)));
     connect(this, SIGNAL(commandDone()), trainer, SLOT(odeCommandDone())); // sync trainer
-    connect(ode,  SIGNAL(commandDone()), trainer, SLOT(odeCommandDone())); // step
+
+    plotFuzzyInput = NULL;
+    plotFuzzyOutput = NULL;
+    connect(trainer, SIGNAL(newFuzzy(fuzzy)), this, SLOT(newFuzzy(fuzzy)));
+
+}
+
+void Simulador::setFuzzyWidgets(PlotFuzzy *plotFuzzyInput_, PlotFuzzy *plotFuzzyOutput_) {
+    plotFuzzyInput = plotFuzzyInput_;
+    plotFuzzyOutput = plotFuzzyOutput_;
+}
+
+void Simulador::newFuzzy(fuzzy f) {
+    if(plotFuzzyInput == NULL || plotFuzzyOutput == NULL)
+        return;
+
+    //plotFuzzyInput->lines.append(QLine(0,0,100,100));
+    //plotFuzzyInput->lines.append(QLine(0,0,-100,100));
+
+    return;
 
 }
 
@@ -77,16 +96,16 @@ bool Simulador::playPause() {
     if(timer->isActive())
         pause();
     else
-        play();
+        play(1);
 
     return timer->isActive();
 }
 
-void Simulador::play(bool sendCommandDone) {
-    ode->playOde();
+void Simulador::play(double sec, bool sendCommandDone) {
+    ode->playOde(sec, sendCommandDone);
     timer->start();
-    if(sendCommandDone)
-        emit commandDone();
+    //if(sendCommandDone)
+    //    emit commandDone();
 }
 
 void Simulador::step(int steps_) {

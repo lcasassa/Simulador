@@ -1,5 +1,6 @@
 #include "robotquadrotor.h"
-#include <ode/ode.h>
+#include "ode.h"
+//#include <ode/ode.h>
 
 bool RobotQuadrotor::key_up = false;
 bool RobotQuadrotor::key_down = false;
@@ -22,11 +23,17 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
             sensorInfrarrojo[i][j] = new SensorInfrarrojo(radio*5);
 
     minDistance = radio*5;
+    promDistance = -1;
 
     for(int i=0; i<4*4; i++)
         distancia_old[i]=radio*5;
 
     control = control_;
+
+    prom = 0;
+    promDistanceTotal = 0;
+    sumgx = 0;
+    sumgy = 0;
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -39,6 +46,23 @@ RobotQuadrotor::~RobotQuadrotor() {
 
 double RobotQuadrotor::getMinDistance() {
     return minDistance - 0.3; // radio of the circles
+}
+
+double RobotQuadrotor::getPromDistance() {
+    /*
+    double prom = 0.0;
+
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++)
+            prom += sensorInfrarrojo[i][j]->getProm();
+
+    return prom / (4.0*4.0);
+    */
+
+    //return prom
+    return sumgx;
+
+    //return promDistance - 0.3; // radio of the circles
 }
 
 void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
@@ -93,6 +117,11 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
         dGeomSetOffsetRotation( sensorInfrarrojo[3][j]->geom, R );
     }
 
+    prom = 0;
+    promDistanceTotal = 0;
+    sumgx = 0;
+    sumgy = 0;
+
     ObjetoFisico::init(world, space);
 }
 
@@ -109,7 +138,7 @@ void RobotQuadrotor::remove() {
 }
 
 void RobotQuadrotor::odeLoop() {
-    static int j=0;
+    //static int j=0;
 
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
@@ -162,6 +191,36 @@ void RobotQuadrotor::odeLoop() {
     w = dBodyGetAngularVel(body);
     dBodyAddForce (body, -roce*v[0], -roce*v[1], -roce*v[2]);
     dBodyAddTorque (body, -roce*w[0]*2, -roce*w[1]*2, -roce*w[2]*2);
+
+
+    double smallestDistance = radio*5;
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++) {
+            if(distancia_old[i*4+j] < 1e-10)
+                continue;
+            if (distancia_old[i*4+j] < smallestDistance)
+                smallestDistance = distancia_old[i*4+j];
+        }
+
+    double sum=0;
+    for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++)
+            sum += distancia_old[i*4+j];
+    promDistanceTotal = promDistanceTotal + (sum - promDistanceTotal)*0.2;
+
+    const dReal *a;
+    a = dBodyGetForce(body);
+
+//    static int count = 0;
+//    if(count++%100==0)
+//        qWarning("%f %f %f", elapsedTime, a[0], a[1]);
+    //gx = a[0];
+    //gy = a[1];
+    sumgx += a[0];
+    sumgy += a[1];
+
+    prom = prom + (smallestDistance - prom)*0.2;
+
 }
 
 void RobotQuadrotor::pintarCirculo(QPainter *p, int i) {
@@ -264,8 +323,26 @@ bool RobotQuadrotor::odeCollide(dGeomID o1, dGeomID o2) {
     for(int i=0; i<4; i++)
         for(int j=0; j<4 ; j++)
             if(sensorInfrarrojo[i][j]->odeCollide(o1, o2)) {
+                double distance = sensorInfrarrojo[i][j]->getDistancia();
+
+                if(distance < 1e-10)
+                    return true;
+
+                double deltaTime = elapsedTime - elapsedTime_old;
+                elapsedTime_old = elapsedTime;
+
+                if(minDistance > distance)
+                    minDistance = distance;
+
                 float alfa = 0.2;
-                minDistance = minDistance*(1-alfa) + (sensorInfrarrojo[i][j]->getDistancia() - minDistance)*alfa;
+                if(promDistance<0)
+                    promDistance = distance;
+                promDistance = promDistance + (distance - promDistance)*alfa;
+                for(double i=0; i<deltaTime; i+=0.01)
+                    promDistance = promDistance + (radio*5 - promDistance)*alfa;
+
+                //qWarning("prom: %f distance %f minDistance %f deltaTime %f", promDistance, distance, minDistance, deltaTime);
+
                 return true;
             }
 

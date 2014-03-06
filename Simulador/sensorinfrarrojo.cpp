@@ -1,5 +1,6 @@
 #include "sensorinfrarrojo.h"
 #include <ode/ode.h>
+#include "ode.h"
 
 SensorInfrarrojo::SensorInfrarrojo(dReal distanciaMaxDetector_, dReal posX_, dReal posY_, dReal thetaZ_)
 {
@@ -7,6 +8,7 @@ SensorInfrarrojo::SensorInfrarrojo(dReal distanciaMaxDetector_, dReal posX_, dRe
     posX = posX_;
     posY = posY_;
     thetaZ = thetaZ_;
+    prom = 0;
 }
 
 void SensorInfrarrojo::init(dWorldID *world, dSpaceID *space) {
@@ -14,6 +16,7 @@ void SensorInfrarrojo::init(dWorldID *world, dSpaceID *space) {
     setPose(posX, posY, thetaZ);
 //    geom; dGeomDisable(
 //    dGeomSetRotation(geom,R);
+    prom = 0;
 }
 
 void SensorInfrarrojo::remove() {
@@ -51,6 +54,9 @@ void SensorInfrarrojo::odeLoop() {
         bodyDetected[1] = plus[1];
         bodyDetected[2] = plus[2];
     }
+
+
+    prom = prom + (distancia - prom)*0.2;
 
     bodyDetected_[0] = 0;
     bodyDetected_[1] = 0;

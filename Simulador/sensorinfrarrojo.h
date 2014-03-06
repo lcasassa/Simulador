@@ -20,6 +20,7 @@ public:
     dGeomID geom;
     dReal distanciaDetectado;
     double getDistancia();
+    double getProm() { return prom; }
 
 private:
     dVector3 pos, dir, plus;
@@ -31,6 +32,7 @@ private:
     dReal posX;
     dReal posY;
     dReal thetaZ;
+    dReal prom;
 };
 
 #endif // SENSORINFRARROJO_H

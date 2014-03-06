@@ -27,9 +27,15 @@ public:
     static bool key_clock;
     static bool key_anticlock;
     double getMinDistance();
+    double getPromDistance();
 
 private:
     double minDistance;
+    double promDistance;
+    double promDistanceTotal;
+    double prom;
+    double gx, gy, sumgx, sumgy;
+    double elapsedTime_old;
     void pintarCirculo(QPainter *p, int i);
     bool isSensorInfrarrojo(dGeomID o1);
     bool isGeom(dGeomID o1);

@@ -6,6 +6,8 @@
 #include "control.h"
 #include "robotquadrotor.h"
 
+extern double elapsedTime;
+
 // simulador.h llama a ode.h y por lo tanto ode.h no puede llamar a simulador.h
 //#include "simulador.h"
 class Simulador;
@@ -21,10 +23,11 @@ public:
     int getStatus();
     static void nearCallback(void *data, dGeomID o1, dGeomID o2);
     static int sleepTime;
+    double getElapsedTime();
 
 public slots:
     void stopOde();
-    void playOde();
+    void playOde(double sec, bool stepEmitCommandDone_);
     void pauseOde();
     void stepOde(int steps_ = 1, bool stepEmitCommandDone = false);
 

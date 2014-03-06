@@ -8,6 +8,8 @@
 #include "trainer.h"
 #include "objetofisico.h"
 #include "robotquadrotor.h"
+#include "plotfuzzy.h"
+
 
 #define DO_NOT_SEND_SIGNAL_WHEN_DONE false
 
@@ -26,14 +28,18 @@ public:
     Ode *ode;
     Trainer *trainer;
 
+    void setFuzzyWidgets(PlotFuzzy *widgetInput, PlotFuzzy *widgetOutput);
+
 public slots:
-    void play(bool sendCommandDone = true);
+    void play(double sec, bool sendCommandDone = true);
     void step(int steps_ = 1);
     void pause();
     void reset();
     void stop(bool sendCommandDone = true);
     void registrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone = true);
     void desregistrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone = true);
+    void newFuzzy(fuzzy f);
+    void odeCommandDone();
 
 protected:
     void paintEvent(QPaintEvent *);
@@ -41,10 +47,11 @@ protected:
 private:
     QTimer *timer;
     RobotQuadrotor *quad;
+    PlotFuzzy *plotFuzzyInput;
+    PlotFuzzy *plotFuzzyOutput;
 
 private slots:
     void timeout();
-    void odeCommandDone();
 
 signals:
     void commandDone();

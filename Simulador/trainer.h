@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include "objetofisico.h"
+#include <fuzzyficacion.h>
 
 class Trainer : public QThread
 {
@@ -13,7 +14,7 @@ public:
     explicit Trainer(QObject *parent = 0);
     ~Trainer();
     void reset();
-    void play();
+    void play(double sec);
     void stop();
     void pause();
     void step(int value);
@@ -26,13 +27,14 @@ protected:
     QWaitCondition odeCommandWaitCondition;
 
 signals:
-    void playOde();
+    void playOde(double);
     void stopOde();
     void pauseOde();
     void resetOde();
     void stepOde(int value);
     void registrarObjetoSimulador(ObjetoFisico * objetoFisico);
     void desregistrarObjetoSimulador(ObjetoFisico * objetoFisico);
+    void newFuzzy(fuzzy f);
     
 public slots:
     void odeCommandDone();

@@ -75,7 +75,7 @@ background-color: rgb(85, 255, 0);
              </sizepolicy>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="tab">
              <attribute name="title">
@@ -229,6 +229,39 @@ background-color: rgb(85, 255, 0);
                     </size>
                    </property>
                   </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="tab_2">
+             <attribute name="title">
+              <string>Fuzzy</string>
+             </attribute>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QGroupBox" name="groupBox_2">
+                <property name="title">
+                 <string>Input</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_5">
+                 <item>
+                  <widget class="PlotFuzzy" name="widgetInput" native="true"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="groupBox">
+                <property name="title">
+                 <string>Output</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <item>
+                  <widget class="PlotFuzzy" name="widgetOutput" native="true">
+                   <zorder>groupBox</zorder>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -392,6 +425,12 @@ background-color: rgb(85, 255, 0);
    <class>Simulador</class>
    <extends>QWidget</extends>
    <header>simulador.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PlotFuzzy</class>
+   <extends>QWidget</extends>
+   <header>plotfuzzy.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

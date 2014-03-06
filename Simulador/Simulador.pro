@@ -29,7 +29,8 @@ SOURCES += main.cpp\
     areatriangular.cpp \
     fuzzyficacion.cpp \
     trainer.cpp \
-    traineralgoritmogenetico.cpp
+    traineralgoritmogenetico.cpp \
+    plotfuzzy.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     areatriangular.h \
     fuzzyficacion.h \
     trainer.h \
-    traineralgoritmogenetico.h
+    traineralgoritmogenetico.h \
+    plotfuzzy.h
 
 FORMS    += mainwindow.ui
 

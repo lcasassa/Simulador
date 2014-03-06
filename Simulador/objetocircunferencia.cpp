@@ -9,7 +9,7 @@ ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce
     posicionInicialY = posicionInicialY_;
     posicionInicialZ = posicionInicialZ_;
     tiempo = 0;
-    qWarning("init ObjetoCircunferencia");
+    //qWarning("init ObjetoCircunferencia");
 }
 
 ObjetoCircunferencia::~ObjetoCircunferencia() {

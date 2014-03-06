@@ -1,6 +1,7 @@
 #include <QtDebug>
 //#include <ode/ode.h>
 
+#include <ode/ode.h>
 #include "ode.h"
 #include "simulador.h"
 #include "objetocircunferencia.h"
@@ -15,6 +16,7 @@ static dJointGroupID contactgroup;
 Simulador *sim; //Ode::nearCallback() usa sim y es unfion statica
 
 int Ode::sleepTime = 1000;
+double elapsedTime;
 
 Ode::Ode(Simulador *simulador_, QObject *parent) :
     QThread(parent)
@@ -24,6 +26,7 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
 
     simulador = simulador_;
     sim = simulador;
+    connect(this,  SIGNAL(commandDone()), simulador, SLOT(odeCommandDone())); // step
 
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
@@ -55,8 +58,11 @@ void Ode::stopOde() {
     setStatus(STOP);
 }
 
-void Ode::playOde() {
-    setStatus(PLAY);
+void Ode::playOde(double sec, bool stepEmitCommandDone_) {
+    stepEmitCommandDone = stepEmitCommandDone_;
+    if(sec < 0.01) sec = 0.01;
+    int steps = sec/0.01;
+    setStatus(steps);
 }
 
 void Ode::pauseOde() {
@@ -99,11 +105,14 @@ void Ode::run() {
     dWorldSetCFM (world,1e-5);
     contactgroup = dJointGroupCreate (0);
 
+    elapsedTime = 0;
+
     setStatus(2); // Para que se pinte bien sensorinfrarrojo.cpp
     // run simulation
 //    dsSimulationLoop (0,0,352,288,0);
     while(getStatus() > STOP) {
 
+        //qWarning("iteracion: %f", elapsedTime);
         while(getStatus() == PAUSE)
             this->msleep(50);
 
@@ -131,6 +140,7 @@ void Ode::run() {
 
         // step the simulation
         dWorldQuickStep (world,0.01);
+        elapsedTime += 0.01;
         // remove all contact joints
         dJointGroupEmpty (contactgroup);
         // redraw sphere at new location
@@ -151,6 +161,10 @@ void Ode::run() {
     dCloseODE();
 //    exec();
 }
+
+/*double Ode::getElapsedTime() {
+    return time;
+}*/
 
 void Ode::lockObjetosFisicos() {
     simulador->listaObjetoFisicoMutex.lock();

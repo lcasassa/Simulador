@@ -3,7 +3,7 @@
 #include "robotquadrotor.h"
 #include "fuzzyficacion.h"
 
-#define DEBUG_TRAINER 1
+//#define DEBUG_TRAINER 0
 
 Trainer::Trainer(QObject *parent) :
     QThread(parent)
@@ -36,11 +36,11 @@ void Trainer::stop() {
 #endif
 }
 
-void Trainer::play() {
+void Trainer::play(double sec) {
 #ifdef DEBUG_TRAINER_2
     qWarning("Trainer: Play");
 #endif
-    emit playOde();
+    emit playOde(sec);
     odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER
     qWarning("Trainer: Play OK");

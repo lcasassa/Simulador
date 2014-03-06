@@ -51,11 +51,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->simuladorWidget->setFuzzyWidgets(ui->widgetInput, ui->widgetOutput);
+
     //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
 
-    int la = ui->spinBoxLoopSleepUs->value();
-    ui->simuladorWidget->ode->sleepTime = la;
+    ui->simuladorWidget->ode->sleepTime = ui->spinBoxLoopSleepUs->value();
     ui->simuladorWidget->setRefrescoHz( ui->spinBoxRefrescoHz->value() );
     connect(ui->simuladorWidget->trainer, SIGNAL(finished()), this, SLOT(trainerFinished()));
 }
