@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>639</width>
+    <width>623</width>
     <height>411</height>
    </rect>
   </property>
@@ -65,9 +65,18 @@ background-color: rgb(85, 255, 0);
        </item>
        <item>
         <widget class="QWidget" name="widget_3" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>250</width>
+           <height>0</height>
+          </size>
+         </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QTabWidget" name="tabWidget">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
               <horstretch>0</horstretch>
@@ -75,7 +84,7 @@ background-color: rgb(85, 255, 0);
              </sizepolicy>
             </property>
             <property name="currentIndex">
-             <number>2</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="tab">
              <attribute name="title">
@@ -259,9 +268,7 @@ background-color: rgb(85, 255, 0);
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
                  <item>
-                  <widget class="PlotFuzzy" name="widgetOutput" native="true">
-                   <zorder>groupBox</zorder>
-                  </widget>
+                  <widget class="PlotFuzzy" name="widgetOutput" native="true"/>
                  </item>
                 </layout>
                </widget>
@@ -290,6 +297,9 @@ background-color: rgb(85, 255, 0);
              </property>
              <item>
               <widget class="QSpinBox" name="spinBoxSteps">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="maximum">
                 <number>1999</number>
                </property>
@@ -297,6 +307,9 @@ background-color: rgb(85, 255, 0);
              </item>
              <item>
               <widget class="QPushButton" name="pushButtonStep">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
                 <string>Step</string>
                </property>
@@ -307,6 +320,9 @@ background-color: rgb(85, 255, 0);
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonReset">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Reset</string>
             </property>
@@ -314,6 +330,9 @@ background-color: rgb(85, 255, 0);
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonStart">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Start</string>
             </property>
@@ -375,8 +394,8 @@ background-color: rgb(85, 255, 0);
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>639</width>
-     <height>25</height>
+     <width>623</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

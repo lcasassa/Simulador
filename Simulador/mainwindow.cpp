@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->simuladorWidget->setFuzzyWidgets(ui->widgetInput, ui->widgetOutput);
+    ui->tabWidget->setTabEnabled(2, false);
 
     //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
