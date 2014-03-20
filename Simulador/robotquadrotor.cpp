@@ -12,6 +12,7 @@ bool RobotQuadrotor::key_anticlock = false;
 
 RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, float posicionInicialY_)
 {
+    loopControlCount=0;
     posicionInicialX = posicionInicialX_;
     posicionInicialY = posicionInicialY_;
 
@@ -137,7 +138,7 @@ void RobotQuadrotor::odeLoop() {
         dBodyAddTorque (body,  0.0, 0.0,  0.1);
 
 
-    if(control != NULL) {
+    if(control != NULL && (loopControlCount++%10)==0) {
         qreal distancia_[4*4];
         qreal vel_[4*4];
         qreal out_[2];
@@ -151,7 +152,7 @@ void RobotQuadrotor::odeLoop() {
             }
 
         control->loopControl(distancia_, vel_, out_);
-        dBodyAddRelForce (body, 0.01*out_[0], 0.01*out_[1], 0);
+        dBodyAddRelForce (body, out_[0], out_[1], 0);
     }
 
     // Roce
@@ -199,7 +200,7 @@ double RobotQuadrotor::getSumG() {
 }
 
 double RobotQuadrotor::getMinDistance() {
-    return minDistance - 0.3; // radio of the circles
+    return minDistance; // radio of the circles
 }
 
 double RobotQuadrotor::getPromDistance() {

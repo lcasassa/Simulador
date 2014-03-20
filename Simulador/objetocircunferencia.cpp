@@ -69,8 +69,8 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
 void ObjetoCircunferencia::odeLoop() {
     const dReal *v,*w;
 
-    dBodyAddForce (body, cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, 0);
-    tiempo += 0.5;
+    dBodyAddForce (body, 10*cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, 10*sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, 0);
+    tiempo += 2.5;
     // Roce
     v = dBodyGetLinearVel(body);
     w = dBodyGetAngularVel(body);

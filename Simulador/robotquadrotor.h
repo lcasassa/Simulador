@@ -53,6 +53,7 @@ private:
     bool deleteFizzyficacion;
     float posicionInicialX;
     float posicionInicialY;
+    int loopControlCount;
 };
 
 #endif // ROBOTQUADROTOR_H

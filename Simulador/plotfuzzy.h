@@ -11,14 +11,17 @@ class PlotFuzzy : public QWidget
     Q_OBJECT
 public:
     PlotFuzzy(QWidget *parent = 0);
-    QList<QLine> estoesunascuantaaslineas;
-    
+    float triangulos[3][3];
+    void setDatos(int i, float x1, float x2, float x3, bool range=false);
+
 signals:
     
 public slots:
 
 protected:
     void paintEvent(QPaintEvent *event);
+private:
+    int count;
     
 };
 

@@ -5,6 +5,7 @@
 #include <ode/ode.h>
 #include "control.h"
 #include "robotquadrotor.h"
+#include <QWaitCondition>
 
 extern double elapsedTime;
 
@@ -15,21 +16,25 @@ class Simulador;
 class Ode : public QThread
 {
     Q_OBJECT
-    enum STATUS_MODE { ODE_NOT_INIT = -4, SUBSTRACT_ONE = -3, STOP = -2, PLAY = -1, PAUSE = 0, STEP = 1 };
 public:
+    enum STATUS_MODE { ODE_NOT_INIT = -4, SUBSTRACT_ONE = -3, STOP = -2, PLAY = -1, PAUSE = 0, STEP = 1 };
     explicit Ode(Simulador *simulador_, QObject *parent = 0);
+    ~Ode();
     bool isRunning();
+    bool isPaused();
     void setStatus(int status_);
     int getStatus();
     static void nearCallback(void *data, dGeomID o1, dGeomID o2);
     static int sleepTime;
     double getElapsedTime();
+    QMutex odeFinishMutex;
 
 public slots:
     void stopOde();
-    void playOde(double sec, bool stepEmitCommandDone_);
+    void playOde(double sec);
     void pauseOde();
-    void stepOde(int steps_ = 1, bool stepEmitCommandDone = false);
+    void stepOde(int steps_ = 1);
+    void finish();
 
 protected:
     void run();
@@ -37,14 +42,16 @@ protected:
     void unlockObjetosFisicos();
 
 private:
-    bool stepEmitCommandDone;
     Simulador *simulador;
     int status;
     QMutex statusMutex;
 
+    QWaitCondition odeFinishWaitCondition;
+
+    QList<ObjetoFisico*> listaObjetosFisicos;
+
 signals:
     void results(int value);
-    void commandDone();
 
 public slots:
 

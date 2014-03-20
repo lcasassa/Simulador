@@ -30,7 +30,10 @@ SOURCES += main.cpp\
     fuzzyficacion.cpp \
     trainer.cpp \
     traineralgoritmogenetico.cpp \
-    plotfuzzy.cpp
+    plotfuzzy.cpp \
+    simgalib/simgalib.cpp \
+    simgalib/simpsolib.cpp \
+    simgalib/simtstlib.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -46,7 +49,10 @@ HEADERS  += mainwindow.h \
     fuzzyficacion.h \
     trainer.h \
     traineralgoritmogenetico.h \
-    plotfuzzy.h
+    plotfuzzy.h \
+    simgalib/simgalib.h \
+    simgalib/simpsolib.h \
+    simgalib/simtstlib.h
 
 FORMS    += mainwindow.ui
 
@@ -56,6 +62,8 @@ FORMS    += mainwindow.ui
 #    PKG_CONFIG_PATH = /Users/linuscasassa/Bibliotecas/install/bin
 #}
 
+
+#LIBS += -lmat
 # ode 0.12, 0.11 de ubuntu no!
 unix: !mac: {
     #CONFIG += link_pkgconfig

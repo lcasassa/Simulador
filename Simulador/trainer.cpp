@@ -2,12 +2,14 @@
 #include "objetocircunferencia.h"
 #include "robotquadrotor.h"
 #include "fuzzyficacion.h"
+#include "simulador.h";
 
 //#define DEBUG_TRAINER 0
 
-Trainer::Trainer(QObject *parent) :
+Trainer::Trainer(Simulador *sim_, QObject *parent) :
     QThread(parent)
 {
+    sim = sim_;
 }
 
 Trainer::~Trainer() {
@@ -19,7 +21,6 @@ void Trainer::reset() {
     qWarning("Trainer: Reset");
 #endif
     emit resetOde();
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER
     qWarning("Trainer: Reset OK");
 #endif
@@ -30,7 +31,6 @@ void Trainer::stop() {
     qWarning("Trainer: Stop");
 #endif
     emit stopOde();
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER
     qWarning("Trainer: Stop OK");
 #endif
@@ -41,7 +41,6 @@ void Trainer::play(double sec) {
     qWarning("Trainer: Play");
 #endif
     emit playOde(sec);
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER
     qWarning("Trainer: Play OK");
 #endif
@@ -52,7 +51,6 @@ void Trainer::pause() {
     qWarning("Trainer: Pause");
 #endif
     emit pauseOde();
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER
     qWarning("Trainer: Pause OK");
 #endif
@@ -72,7 +70,6 @@ void Trainer::step(int value) {
 
 void Trainer::registrarObjeto(ObjetoFisico * objetoFisico) {
     emit registrarObjetoSimulador(objetoFisico);
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER2
     qWarning("Trainer: registrarObjeto OK");
 #endif
@@ -80,12 +77,14 @@ void Trainer::registrarObjeto(ObjetoFisico * objetoFisico) {
 
 void Trainer::desregistrarObjeto(ObjetoFisico * objetoFisico) {
     emit desregistrarObjetoSimulador(objetoFisico);
-    odeCommandWaitCondition.wait(&odeCommandMutex);
 #ifdef DEBUG_TRAINER2
     qWarning("Trainer: desregistrarObjeto OK");
 #endif
 }
 
-void Trainer::odeCommandDone() {
-    odeCommandWaitCondition.wakeAll();
+void Trainer::delOde() {
+    emit destroyOde();
+#ifdef DEBUG_TRAINER2
+    qWarning("Trainer: destroyOde OK");
+#endif
 }

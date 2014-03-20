@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QByteArray>
+#include <QMetaType>
 //#include "areatriangular.h"
 
 //#include <ode/ode.h>
@@ -15,6 +16,7 @@ struct fuzzy {
     double output[4][2];
 
 };
+Q_DECLARE_METATYPE(fuzzy)
 
 class Fuzzyficacion : public QObject
 {
@@ -23,9 +25,9 @@ public:
     explicit Fuzzyficacion(QObject *parent = 0);
     void evaluar(qreal distancia_[4*4], qreal vel_[4*4], qreal out_[2]);
     float fuzzyfica(float distancia_, float vel_);
-    void setFuzzy(QByteArray b);
+    void setFuzzy(fuzzy &f);
     ~Fuzzyficacion();
-    static QByteArray serialize(struct fuzzy f);
+    //static QByteArray serialize(struct fuzzy f);
 //    void pintar(QPainter *p);
 //    void addAreaTriangular(QString nombre_, qreal base1_, qreal base2_, qreal punta_);
 //    void addAreaTriangular(QString nombre_, qreal base1_, qreal base2_);

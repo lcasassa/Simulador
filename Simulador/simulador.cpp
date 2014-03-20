@@ -2,6 +2,27 @@
 #include "traineralgoritmogenetico.h"
 #include <QPainter>
 #include <QTimer>
+#include <QtGui/QApplication>
+
+#include <QWaitCondition>
+#include <QMutex>
+
+class Sleep
+{
+public:
+    static void msleep(unsigned long msecs)
+    {
+        QMutex mutex;
+        mutex.lock();
+
+        QWaitCondition waitCondition;
+        waitCondition.wait(&mutex, msecs);
+
+        mutex.unlock(); // Not necessary since new mutex will always be created,
+                        // but since destroying locked mutex
+                        // is bringing undefined behavior, let's follow some ethics
+    }
+};
 
 //#define DEBUG_SIMULADOR 1
 
@@ -22,37 +43,64 @@ Simulador::Simulador(QWidget *parent) :
 #ifdef DEBUG_SIMULADOR
     qWarning("new Trainer()");
 #endif
-    trainer = new TrainerAlgoritmoGenetico(this);
+    trainer = new TrainerAlgoritmoGenetico(this, this);
 
-    connect(trainer, SIGNAL(playOde(double)),  this, SLOT(play(double)));
-    connect(trainer, SIGNAL(stopOde()),  this, SLOT(stop()));
-    connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()));
-    connect(trainer, SIGNAL(pauseOde()), this, SLOT(pause()));
-    connect(trainer, SIGNAL(stepOde(int)), this, SLOT(step(int)));
-    connect(trainer, SIGNAL(registrarObjetoSimulador(ObjetoFisico*)), this, SLOT(registrarObjeto(ObjetoFisico*)));
-    connect(trainer, SIGNAL(desregistrarObjetoSimulador(ObjetoFisico*)), this, SLOT(desregistrarObjeto(ObjetoFisico*)));
-    connect(this, SIGNAL(commandDone()), trainer, SLOT(odeCommandDone())); // sync trainer
+    connect(trainer, SIGNAL(playOde(double)),  this, SLOT(play(double)), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(stopOde()),  this, SLOT(stop()), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(delOde()),  this, SLOT(destroyOde()), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(pauseOde()), this, SLOT(pause()), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(stepOde(int)), this, SLOT(step(int)), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(registrarObjetoSimulador(ObjetoFisico*)), this, SLOT(registrarObjeto(ObjetoFisico*)), Qt::BlockingQueuedConnection);
+    connect(trainer, SIGNAL(desregistrarObjetoSimulador(ObjetoFisico*)), this, SLOT(desregistrarObjeto(ObjetoFisico*)), Qt::BlockingQueuedConnection);
 
     plotFuzzyInput = NULL;
     plotFuzzyOutput = NULL;
+    qRegisterMetaType<fuzzy>( "fuzzy" );
     connect(trainer, SIGNAL(newFuzzy(fuzzy)), this, SLOT(newFuzzy(fuzzy)));
+    connect(trainer, SIGNAL(bestFuzzy(fuzzy)), this, SLOT(bestFuzzy(fuzzy)));
 
 }
 
-void Simulador::setFuzzyWidgets(PlotFuzzy *plotFuzzyInput_, PlotFuzzy *plotFuzzyOutput_) {
+void Simulador::setFuzzyWidgets(PlotFuzzy *plotFuzzyInput_, PlotFuzzy *plotFuzzyOutput_, PlotFuzzy *plotFuzzyInput2_, PlotFuzzy *plotFuzzyOutput2_) {
     plotFuzzyInput = plotFuzzyInput_;
     plotFuzzyOutput = plotFuzzyOutput_;
+    plotFuzzyInput2 = plotFuzzyInput2_;
+    plotFuzzyOutput2 = plotFuzzyOutput2_;
 }
 
 void Simulador::newFuzzy(fuzzy f) {
     if(plotFuzzyInput == NULL || plotFuzzyOutput == NULL)
         return;
 
-    //plotFuzzyInput->lines.append(QLine(0,0,100,100));
-    //plotFuzzyInput->lines.append(QLine(0,0,-100,100));
+    plotFuzzyInput->setDatos(0, f.input1[0][0], f.input1[0][0], f.input1[0][1]);
+    plotFuzzyInput->setDatos(1, f.input1[1][0], (f.input1[1][0] + f.input1[1][1]) / 2, f.input1[1][1]);
+    plotFuzzyInput->setDatos(2, f.input1[2][0], f.input1[2][1], f.input1[2][1]);
+    plotFuzzyInput->repaint();
+
+    plotFuzzyInput2->setDatos(0, f.input2[0][0], f.input2[0][0], f.input2[0][1], true);
+    plotFuzzyInput2->setDatos(1, f.input2[1][0], (f.input2[1][0] + f.input2[1][1]) / 2, f.input2[1][1], true);
+    plotFuzzyInput2->setDatos(2, f.input2[2][0], f.input2[2][1], f.input2[2][1], true);
+    plotFuzzyInput2->repaint();
 
     return;
+}
 
+void Simulador::bestFuzzy(fuzzy f) {
+    if(plotFuzzyInput == NULL || plotFuzzyOutput == NULL)
+        return;
+
+    plotFuzzyOutput->setDatos(0, f.input1[0][0], f.input1[0][0], f.input1[0][1]);
+    plotFuzzyOutput->setDatos(1, f.input1[1][0], (f.input1[1][0] + f.input1[1][1]) / 2, f.input1[1][1]);
+    plotFuzzyOutput->setDatos(2, f.input1[2][0], f.input1[2][1], f.input1[2][1]);
+    plotFuzzyOutput->repaint();
+
+    plotFuzzyOutput2->setDatos(0, f.input2[0][0], f.input2[0][0], f.input2[0][1], true);
+    plotFuzzyOutput2->setDatos(1, f.input2[1][0], (f.input2[1][0] + f.input2[1][1]) / 2, f.input2[1][1], true);
+    plotFuzzyOutput2->setDatos(2, f.input2[2][0], f.input2[2][1], f.input2[2][1], true);
+    plotFuzzyOutput2->repaint();
+
+    return;
 }
 
 Simulador::~Simulador() {
@@ -74,22 +122,17 @@ void Simulador::timeout() {
     this->repaint();
 }
 
-void Simulador::registrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
+void Simulador::registrarObjeto(ObjetoFisico *objetoFisico) {
     listaObjetoFisicoMutex.lock();
     listaObjetoFisico.append(objetoFisico);
     listaObjetoFisicoMutex.unlock();
-    if(sendCommandDone)
-        emit commandDone();
-
 }
 
-void Simulador::desregistrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone) {
+void Simulador::desregistrarObjeto(ObjetoFisico *objetoFisico) {
     listaObjetoFisicoMutex.lock();
     objetoFisico->remove();
     listaObjetoFisico.removeOne(objetoFisico);
     listaObjetoFisicoMutex.unlock();
-    if(sendCommandDone)
-        emit commandDone();
 }
 
 bool Simulador::playPause() {
@@ -101,55 +144,77 @@ bool Simulador::playPause() {
     return timer->isActive();
 }
 
-void Simulador::play(double sec, bool sendCommandDone) {
-    ode->playOde(sec, sendCommandDone);
+void Simulador::play(double sec) {
     timer->start();
+    ode->playOde(sec);
+    while(ode->getStatus() > Ode::PAUSE)
+        QApplication::processEvents();
     //if(sendCommandDone)
     //    emit commandDone();
 }
 
 void Simulador::step(int steps_) {
     timer->stop();
-    ode->stepOde(steps_, true);
-    for(int i=0; i<10; i++)
-        QTimer::singleShot(100*i, this, SLOT(timeout())); // just in case ode takes more time to solve all the steps
-}
-
-void Simulador::odeCommandDone() {
-    emit commandDone();
+    ode->stepOde(steps_);
+    //while(ode->getStatus() != Ode::PAUSE) ;
+    //for(int i=0; i<10; i++)
+    //    QTimer::singleShot(100*i, this, SLOT(timeout())); // just in case ode takes more time to solve all the steps
 }
 
 void Simulador::pause() {
     ode->pauseOde();
     timer->stop();
-    emit commandDone();
 }
 
-void Simulador::stop(bool sendCommandDone) {
+void Simulador::stop() {
     timer->stop();
     ode->stopOde();
-    ode->wait(3000);
+
+    //int i=0;
+    //while(ode->getStatus() >= Ode::STOP && i++<=10) {
+    //    Sleep::msleep(10);
+    //}
+    //if(sendCommandDone) {
+    //    i=0;
+    //    while(trainer->isRunning() && i++<=10) {
+    //        Sleep::msleep(10);
+    //    }
+    //}
+
+}
+
+void Simulador::destroyOde() {
+    ode->finish();
+    ode->wait(100);
+
     if(ode->isRunning()) {
         qWarning("Matando al thread");
+        ode->terminate();
     }
-    if(sendCommandDone)
-        emit commandDone();
+}
+
+bool Simulador::odeRunning() {
+
+    int i = ode->getStatus();
+
+    return i >= 0;
 }
 
 void Simulador::reset() {
-    stop(DO_NOT_SEND_SIGNAL_WHEN_DONE);
+    stop();
 
     listaObjetoFisicoMutex.lock();
     listaObjetoFisico.clear();
     listaObjetoFisicoMutex.unlock();
+
+    destroyOde();
     delete ode;
 
-    ode = new Ode(this);
+    ode = new Ode(this, this);
 
     QTimer::singleShot(100, this, SLOT(timeout()));
 
-    while(!ode->isRunning()) ;
-    emit commandDone();
+    while(!ode->isPaused()) ;
 
 }
 
@@ -177,4 +242,5 @@ void Simulador::paintEvent(QPaintEvent *) {
     p.end();
 
 }
+
 

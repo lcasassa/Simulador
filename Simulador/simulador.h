@@ -10,9 +10,6 @@
 #include "robotquadrotor.h"
 #include "plotfuzzy.h"
 
-
-#define DO_NOT_SEND_SIGNAL_WHEN_DONE false
-
 class Simulador : public QWidget
 {
     Q_OBJECT
@@ -21,6 +18,7 @@ public:
     ~Simulador();
 
     bool playPause();
+    bool odeRunning();
     void setRefrescoHz(int refrescoHz);
 
     QList<ObjetoFisico*> listaObjetoFisico;
@@ -28,33 +26,35 @@ public:
     Ode *ode;
     Trainer *trainer;
 
-    void setFuzzyWidgets(PlotFuzzy *widgetInput, PlotFuzzy *widgetOutput);
+    void setFuzzyWidgets(PlotFuzzy *plotFuzzyInput_, PlotFuzzy *plotFuzzyOutput_, PlotFuzzy *plotFuzzyInput2_, PlotFuzzy *plotFuzzyOutput2_);
 
 public slots:
-    void play(double sec, bool sendCommandDone = true);
+    void play(double sec);
     void step(int steps_ = 1);
     void pause();
     void reset();
-    void stop(bool sendCommandDone = true);
-    void registrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone = true);
-    void desregistrarObjeto(ObjetoFisico *objetoFisico, bool sendCommandDone = true);
+    void stop();
+    void destroyOde();
+    void registrarObjeto(ObjetoFisico *objetoFisico);
+    void desregistrarObjeto(ObjetoFisico *objetoFisico);
     void newFuzzy(fuzzy f);
-    void odeCommandDone();
+    void bestFuzzy(fuzzy f);
 
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     QTimer *timer;
-    RobotQuadrotor *quad;
     PlotFuzzy *plotFuzzyInput;
     PlotFuzzy *plotFuzzyOutput;
+    PlotFuzzy *plotFuzzyInput2;
+    PlotFuzzy *plotFuzzyOutput2;
 
 private slots:
     void timeout();
 
 signals:
-    void commandDone();
+    void stopTrainer();
     
 };
 

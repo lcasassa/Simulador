@@ -22,11 +22,9 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     QThread(parent)
 {
     setStatus(ODE_NOT_INIT);
-    stepEmitCommandDone = false;
 
     simulador = simulador_;
     sim = simulador;
-    connect(this,  SIGNAL(commandDone()), simulador, SLOT(odeCommandDone())); // step
 
 /*
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-1, -1), QPointF( 1, -1.4)));
@@ -36,14 +34,17 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     simulador->registrarObjeto(new ObjetoLinea(QPointF( 4,-4), QPointF(-4,-4.5)));
     simulador->registrarObjeto(new ObjetoLinea(QPointF(-4,-4), QPointF(-4, 4.5)));
  */
+
     qreal ancho=0.1, largo=4.5;
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // arriba
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // derecha
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // abajo
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // izquiera
+    listaObjetosFisicos.append(new ObjetoLinea(QPointF(largo, largo), QPointF(-largo, largo+ancho))); // arriba
+    listaObjetosFisicos.append(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
+    listaObjetosFisicos.append(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
+    listaObjetosFisicos.append(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
+    listaObjetosFisicos.append(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
 
-
-    simulador->registrarObjeto(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2)), DO_NOT_SEND_SIGNAL_WHEN_DONE); // centro
+    foreach(ObjetoFisico *of, listaObjetosFisicos) {
+        simulador->registrarObjeto(of);
+    }
 
     //    simulador->registrarObjeto(new SensorInfrarrojo());
 
@@ -54,12 +55,19 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     robotQuadrotor->setControl(control);
 }*/
 
-void Ode::stopOde() {
-    setStatus(STOP);
+Ode::~Ode() {
+    foreach(ObjetoFisico *of, listaObjetosFisicos) {
+        simulador->desregistrarObjeto(of);
+    }
 }
 
-void Ode::playOde(double sec, bool stepEmitCommandDone_) {
-    stepEmitCommandDone = stepEmitCommandDone_;
+void Ode::stopOde() {
+    setStatus(STOP);
+    while(getStatus() != ODE_NOT_INIT)
+        msleep(10);
+}
+
+void Ode::playOde(double sec) {
     if(sec < 0.01) sec = 0.01;
     int steps = sec/0.01;
     setStatus(steps);
@@ -69,14 +77,18 @@ void Ode::pauseOde() {
     setStatus(PAUSE);
 }
 
-void Ode::stepOde(int steps_, bool stepEmitCommandDone_) {
+void Ode::stepOde(int steps_) {
     if(steps_ > 0)
         setStatus(steps_);
-    stepEmitCommandDone = stepEmitCommandDone_;
+    while(getStatus() != PAUSE) msleep(10);
 }
 
 bool Ode::isRunning() {
     return (getStatus() >= -1);
+}
+
+bool Ode::isPaused() {
+    return (getStatus() == PAUSE);
 }
 
 int Ode::getStatus() {
@@ -118,10 +130,6 @@ void Ode::run() {
 
         if(getStatus() >= STEP) {
             setStatus(SUBSTRACT_ONE);
-            if(stepEmitCommandDone && getStatus() == 0) {
-                stepEmitCommandDone = false;
-                emit commandDone();
-            }
         }
 
         lockObjetosFisicos();
@@ -154,6 +162,12 @@ void Ode::run() {
         //qWarning("ode loop");
     }
 
+    //odeFinishMutex.lock();
+    setStatus(ODE_NOT_INIT);
+    while(getStatus() == ODE_NOT_INIT) msleep(10);
+    //odeFinishWaitCondition.wait(&odeFinishMutex);
+    //odeFinishMutex.unlock();
+
     // clean up
     dJointGroupDestroy (contactgroup);
     dSpaceDestroy (space);
@@ -165,6 +179,11 @@ void Ode::run() {
 /*double Ode::getElapsedTime() {
     return time;
 }*/
+
+void Ode::finish() {
+    //odeFinishWaitCondition.wakeAll();
+    setStatus(STOP);
+}
 
 void Ode::lockObjetosFisicos() {
     simulador->listaObjetoFisicoMutex.lock();

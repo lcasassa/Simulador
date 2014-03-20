@@ -32,7 +32,7 @@ f.output[2][1] =  0.50;
 f.output[3][0] =  0.00;
 f.output[3][1] =  1.00;
 */
-
+/*
 QByteArray Fuzzyficacion::serialize(struct fuzzy f) {
     QByteArray b;
     QDataStream d(&b, QIODevice::WriteOnly);
@@ -43,9 +43,9 @@ QByteArray Fuzzyficacion::serialize(struct fuzzy f) {
     }
     return b;
 }
-
-void Fuzzyficacion::setFuzzy(QByteArray b) {
-
+*/
+void Fuzzyficacion::setFuzzy(fuzzy &f) {
+/*
     QDataStream d(b);
     struct fuzzy f;
     double *df = (double *)&f;
@@ -54,6 +54,7 @@ void Fuzzyficacion::setFuzzy(QByteArray b) {
         d >> value;
         df[i] = value;
     }
+*/
 /*
     struct fuzzy f;
     f.input1[0][0] = 0.00;
