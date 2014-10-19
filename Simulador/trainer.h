@@ -38,7 +38,7 @@ signals:
     void stepOde(int value);
     void registrarObjetoSimulador(ObjetoFisico * objetoFisico);
     void desregistrarObjetoSimulador(ObjetoFisico * objetoFisico);
-    void newFuzzy(fuzzy f);
+    void newFuzzy(fuzzy f, bool setSpinBox);
     void bestFuzzy(fuzzy f);
     
 };

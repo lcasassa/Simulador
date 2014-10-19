@@ -40,7 +40,6 @@ Ode::Ode(Simulador *simulador_, QObject *parent) :
     listaObjetosFisicos.append(new ObjetoLinea(QPointF(largo+ancho,-largo), QPointF( largo, largo))); // derecha
     listaObjetosFisicos.append(new ObjetoLinea(QPointF(largo,-largo), QPointF( -largo, -largo-ancho))); // abajo
     listaObjetosFisicos.append(new ObjetoLinea(QPointF(-largo,-largo), QPointF( -largo-ancho, largo))); // izquiera
-    listaObjetosFisicos.append(new ObjetoLinea(QPointF(-largo/2,-largo/2), QPointF( -largo/2-ancho, largo/2))); // centro
 
     foreach(ObjetoFisico *of, listaObjetosFisicos) {
         simulador->registrarObjeto(of);

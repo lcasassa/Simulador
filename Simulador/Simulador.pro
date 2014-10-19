@@ -9,11 +9,12 @@ QT       += core gui
 TARGET = Simulador
 TEMPLATE = app
 
-QMAKE_CXXFLAGS += -O0
-QMAKE_LFLAGS += -O0
+#QMAKE_CXXFLAGS += -O2
+#QMAKE_LFLAGS += -O2
 
 INCLUDEPATH += ../../fuzzylite/src/fuzzylite/
-LIBS += -L../../fuzzylite/ -lfuzzylite
+#LIBS += -L../../fuzzylite/ -lfuzzylite
+LIBS += -L../../fuzzylite/src/fuzzylite/lib/ -lfuzzylite-static
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -33,7 +34,11 @@ SOURCES += main.cpp\
     plotfuzzy.cpp \
     simgalib/simgalib.cpp \
     simgalib/simpsolib.cpp \
-    simgalib/simtstlib.cpp
+    simgalib/simtstlib.cpp \
+    escenariotresobjetos.cpp \
+    escenario.cpp \
+    escenariounobjeto.cpp \
+    trainertestcontroller.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -52,7 +57,11 @@ HEADERS  += mainwindow.h \
     plotfuzzy.h \
     simgalib/simgalib.h \
     simgalib/simpsolib.h \
-    simgalib/simtstlib.h
+    simgalib/simtstlib.h \
+    escenariotresobjetos.h \
+    escenario.h \
+    escenariounobjeto.h \
+    trainertestcontroller.h
 
 FORMS    += mainwindow.ui
 

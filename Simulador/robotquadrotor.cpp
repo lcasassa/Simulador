@@ -1,6 +1,8 @@
 #include "robotquadrotor.h"
 #include "ode.h"
 //#include <ode/ode.h>
+#include <QStringList>
+#include <QCoreApplication>
 
 bool RobotQuadrotor::key_up = false;
 bool RobotQuadrotor::key_down = false;
@@ -18,6 +20,9 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
 
     radio = 0.3;
     masa = 1;
+
+    QStringList argumentList(QCoreApplication::arguments());
+    density = argumentList[4].toFloat();
 
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
@@ -55,7 +60,7 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
     geom[1] = dCreateSphere(*space, radio);
     geom[2] = dCreateSphere(*space, radio);
     geom[3] = dCreateSphere(*space, radio);
-    dMassSetSphere(&m, 1, masa);
+    dMassSetSphere(&m, density, masa);
     dBodySetMass(body, &m);
     dGeomSetBody(geom[0], body);
     dGeomSetBody(geom[1], body);
@@ -138,7 +143,7 @@ void RobotQuadrotor::odeLoop() {
         dBodyAddTorque (body,  0.0, 0.0,  0.1);
 
 
-    if(control != NULL && (loopControlCount++%10)==0) {
+    if(control != NULL && (loopControlCount++%20)==0) {
         qreal distancia_[4*4];
         qreal vel_[4*4];
         qreal out_[2];
@@ -147,7 +152,7 @@ void RobotQuadrotor::odeLoop() {
         for(int i=0; i<4; i++)
             for(int j=0; j<4; j++) {
                 distancia_[i*4+j] = ( sensorInfrarrojo[i][j]->distanciaDetectado - 0.3 ) / (0.3*5 - 0.3);
-                vel_[i*4+j] = distancia_old[i*4+j] - distancia_[i*4+j];
+                vel_[i*4+j] = distancia_[i*4+j] - distancia_old[i*4+j];
                 distancia_old[i*4+j] = distancia_[i*4+j];
             }
 

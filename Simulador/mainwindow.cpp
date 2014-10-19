@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QKeyEvent>
 #include "robotquadrotor.h"
+#include <QTimer>
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
@@ -52,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->simuladorWidget->setFuzzyWidgets(ui->widgetInput, ui->widgetOutput, ui->widgetInput2, ui->widgetOutput2);
+    ui->simuladorWidget->setUI(ui);
 
     //on_actionStart_Stop_triggered();
     setFocusPolicy(Qt::StrongFocus);
@@ -59,6 +61,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->simuladorWidget->ode->sleepTime = ui->spinBoxLoopSleepUs->value();
     ui->simuladorWidget->setRefrescoHz( ui->spinBoxRefrescoHz->value() );
     connect(ui->simuladorWidget->trainer, SIGNAL(finished()), this, SLOT(trainerFinished()));
+
+    QTimer::singleShot(500, this, SLOT(on_pushButtonStartTraining_clicked()));
 }
 
 MainWindow::~MainWindow()
@@ -105,9 +109,42 @@ void MainWindow::on_pushButtonStartTraining_clicked()
 {
     ui->pushButtonStartTraining->setEnabled(false);
     ui->simuladorWidget->trainer->start();
+    //showFullScreen();
 }
 
 void MainWindow::trainerFinished() {
     ui->pushButtonStartTraining->setEnabled(true);
 }
 
+
+void MainWindow::on_pushButton_save_clicked()
+{
+    int slot = -1;
+    if(ui->radioButton->isChecked())
+        slot = 1;
+    else if(ui->radioButton_2->isChecked())
+        slot = 2;
+    else if(ui->radioButton_3->isChecked())
+        slot = 3;
+
+    QString file(QString("savefile_") + QString::number(slot) + ".bin");
+    ui->simuladorWidget->save(file);
+
+    qWarning("Saved to file %d", slot);
+}
+
+void MainWindow::on_pushButton_load_clicked()
+{
+    int slot = -1;
+    if(ui->radioButton->isChecked())
+        slot = 1;
+    else if(ui->radioButton_2->isChecked())
+        slot = 2;
+    else if(ui->radioButton_3->isChecked())
+        slot = 3;
+
+    QString file(QString("savefile_") + QString::number(slot) + ".bin");
+    ui->simuladorWidget->load(file);
+
+    qWarning("Loaded from file %d", slot);
+}

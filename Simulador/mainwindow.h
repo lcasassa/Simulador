@@ -29,6 +29,10 @@ private slots:
      void on_pushButtonStartTraining_clicked();
      void trainerFinished();
 
+     void on_pushButton_save_clicked();
+
+     void on_pushButton_load_clicked();
+
 private:
     Ui::MainWindow *ui;
 

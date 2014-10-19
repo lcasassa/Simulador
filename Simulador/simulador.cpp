@@ -1,11 +1,13 @@
 #include "simulador.h"
 #include "traineralgoritmogenetico.h"
+#include "trainertestcontroller.h"
 #include <QPainter>
 #include <QTimer>
 #include <QtGui/QApplication>
 
 #include <QWaitCondition>
 #include <QMutex>
+#include "ui_mainwindow.h"
 
 class Sleep
 {
@@ -44,10 +46,11 @@ Simulador::Simulador(QWidget *parent) :
     qWarning("new Trainer()");
 #endif
     trainer = new TrainerAlgoritmoGenetico(this, this);
+    //trainer = new TrainerTestController(this, this);
 
     connect(trainer, SIGNAL(playOde(double)),  this, SLOT(play(double)), Qt::BlockingQueuedConnection);
     connect(trainer, SIGNAL(stopOde()),  this, SLOT(stop()), Qt::BlockingQueuedConnection);
-    connect(trainer, SIGNAL(delOde()),  this, SLOT(destroyOde()), Qt::BlockingQueuedConnection);
+    //connect(trainer, SIGNAL(delOde()),  this, SLOT(destroyOde()), Qt::BlockingQueuedConnection);
     connect(trainer, SIGNAL(resetOde()), this, SLOT(reset()), Qt::BlockingQueuedConnection);
     connect(trainer, SIGNAL(pauseOde()), this, SLOT(pause()), Qt::BlockingQueuedConnection);
     connect(trainer, SIGNAL(stepOde(int)), this, SLOT(step(int)), Qt::BlockingQueuedConnection);
@@ -57,7 +60,7 @@ Simulador::Simulador(QWidget *parent) :
     plotFuzzyInput = NULL;
     plotFuzzyOutput = NULL;
     qRegisterMetaType<fuzzy>( "fuzzy" );
-    connect(trainer, SIGNAL(newFuzzy(fuzzy)), this, SLOT(newFuzzy(fuzzy)));
+    connect(trainer, SIGNAL(newFuzzy(fuzzy, bool)), this, SLOT(newFuzzy(fuzzy, bool)));
     connect(trainer, SIGNAL(bestFuzzy(fuzzy)), this, SLOT(bestFuzzy(fuzzy)));
 
 }
@@ -69,7 +72,8 @@ void Simulador::setFuzzyWidgets(PlotFuzzy *plotFuzzyInput_, PlotFuzzy *plotFuzzy
     plotFuzzyOutput2 = plotFuzzyOutput2_;
 }
 
-void Simulador::newFuzzy(fuzzy f) {
+void Simulador::newFuzzy(fuzzy f, bool setSpinBox) {
+    fuzzyActual = f;
     if(plotFuzzyInput == NULL || plotFuzzyOutput == NULL)
         return;
 
@@ -78,15 +82,34 @@ void Simulador::newFuzzy(fuzzy f) {
     plotFuzzyInput->setDatos(2, f.input1[2][0], f.input1[2][1], f.input1[2][1]);
     plotFuzzyInput->repaint();
 
+    if(setSpinBox) {
+        ui->doubleSpinBox00->setValue(f.input1[0][0]);
+        ui->doubleSpinBox01->setValue(f.input1[0][1]);
+        ui->doubleSpinBox10->setValue(f.input1[1][0]);
+        ui->doubleSpinBox11->setValue(f.input1[1][1]);
+        ui->doubleSpinBox20->setValue(f.input1[2][0]);
+        ui->doubleSpinBox21->setValue(f.input1[2][1]);
+    }
+
     plotFuzzyInput2->setDatos(0, f.input2[0][0], f.input2[0][0], f.input2[0][1], true);
     plotFuzzyInput2->setDatos(1, f.input2[1][0], (f.input2[1][0] + f.input2[1][1]) / 2, f.input2[1][1], true);
     plotFuzzyInput2->setDatos(2, f.input2[2][0], f.input2[2][1], f.input2[2][1], true);
     plotFuzzyInput2->repaint();
 
+    if(setSpinBox) {
+        ui->doubleSpinBox30->setValue(f.input1[3][0]);
+        ui->doubleSpinBox31->setValue(f.input1[3][1]);
+        ui->doubleSpinBox40->setValue(f.input1[4][0]);
+        ui->doubleSpinBox41->setValue(f.input1[4][1]);
+        ui->doubleSpinBox50->setValue(f.input1[5][0]);
+        ui->doubleSpinBox51->setValue(f.input1[5][1]);
+    }
+
     return;
 }
 
 void Simulador::bestFuzzy(fuzzy f) {
+    fuzzyBest = f;
     if(plotFuzzyInput == NULL || plotFuzzyOutput == NULL)
         return;
 
@@ -104,7 +127,7 @@ void Simulador::bestFuzzy(fuzzy f) {
 }
 
 Simulador::~Simulador() {
-    stop();
+    //stop();
 
     listaObjetoFisicoMutex.lock();
     listaObjetoFisico.clear();
@@ -243,4 +266,67 @@ void Simulador::paintEvent(QPaintEvent *) {
 
 }
 
+#include <QFile>
+#include <QTextStream>
+
+void Simulador::save(QString file) {
+    QFile f(file);
+    f.open(QIODevice::WriteOnly);
+    QTextStream out(&f);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 2; j++)
+            out << (double)(fuzzyActual.input1[i][j]) << " ";
+        out << "\n";
+    }
+
+    out << "\n";
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 2; j++)
+            out << (double)(fuzzyActual.input2[i][j]) << " ";
+        out << "\n";
+    }
+
+    out << "\n";
+
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 2; j++)
+            out << (double)(fuzzyActual.output[i][j]) << " ";
+       out << "\n";
+    }
+
+    out << "\n";
+
+}
+
+void Simulador::load(QString file) {
+    QString s;
+    QFile f(file);
+    f.open(QIODevice::ReadOnly);
+    QTextStream out(&f);
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 2; j++)
+            out >> fuzzyActual.input1[i][j];
+        out >> s;
+    }
+
+    out >> s;
+
+    for(int i = 0; i < 3; i++) {
+        for(int j = 0; j < 2; j++)
+            out >> fuzzyActual.input2[i][j];
+        out >> s;
+    }
+
+    out >> s;
+
+    for(int i = 0; i < 4; i++) {
+        for(int j = 0; j < 2; j++)
+            out >> fuzzyActual.output[i][j];
+        out >> s;
+    }
+
+}
 

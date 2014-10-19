@@ -49,6 +49,7 @@ private:
     dMass m;
     float radio;
     float masa;
+    float density;
     Control *control;
     bool deleteFizzyficacion;
     float posicionInicialX;
