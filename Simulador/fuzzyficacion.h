@@ -27,6 +27,8 @@ public:
     float fuzzyfica(float distancia_, float vel_);
     void setFuzzy(fuzzy &f);
     ~Fuzzyficacion();
+    static void exportFuzzy(const fuzzy &f, QString fileName);
+    static void importFuzzy(fuzzy &f, QString fileName);
     //static QByteArray serialize(struct fuzzy f);
 //    void pintar(QPainter *p);
 //    void addAreaTriangular(QString nombre_, qreal base1_, qreal base2_, qreal punta_);

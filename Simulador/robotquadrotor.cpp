@@ -22,7 +22,12 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
     masa = 1;
 
     QStringList argumentList(QCoreApplication::arguments());
-    density = argumentList[4].toFloat();
+    if(argumentList.size() == 5)
+        density = argumentList[4].toFloat();
+    if(argumentList.size() == 3)
+        density = argumentList[2].toFloat();
+    else
+        density = 1;
 
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)

@@ -12,6 +12,7 @@
 #include <QApplication>
 
 #include "ui_mainwindow.h"
+#include "mainwindow.h"
 
 #include "simgalib/simgalib.h"
 #include "simgalib/simpsolib.h"
@@ -20,12 +21,15 @@
 //#define ONE_LONG_RUN
 //#define FIVE_SHORT_RUN
 //#define ONE_SHORT_RUN
+//#define SHORT_TEST_RUN
 
 #define SIMULATE_ESCENARIO_TRES_OBJETOS
-//#define SIMULATE_ESCENARIO_UNO_OBJETO
+#define SIMULATE_ESCENARIO_UNO_OBJETO
 
+//#define TEST_TUNING
 //#define MANUAL_TUNING
 #define AUTO_TUNING
+
 
 using namespace simgalib;
 using namespace simpsolib;
@@ -122,6 +126,29 @@ double quad_test_fn(int num_vars, int bits_per_var, vector<double> range_low, ve
 
 void TrainerAlgoritmoGenetico::run() {
 
+#ifdef TEST_TUNING
+
+    QStringList argumentList(QCoreApplication::arguments());
+
+
+    Ui::MainWindow *ui = sim->getUI();
+    ui->spinBoxLoopSleepUs->setValue(350);
+    (qobject_cast<MainWindow*>(sim->parent()->parent()->parent()))->setWindowTitle("Fuzzy " + argumentList[1]);
+
+    file.setFileName("outputTest.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    int run = 2000;
+    while( run-- > 0) {
+        fuzzy f;
+        Fuzzyficacion::importFuzzy(f, argumentList[1]);
+
+        doSimulation(f, false);
+    }
+
+#endif
+
 #ifdef MANUAL_TUNING
 
     file.setFileName("outputManual.txt");
@@ -172,10 +199,12 @@ void TrainerAlgoritmoGenetico::run() {
     if(argumentList.size() != 5)
         qWarning("Bad arguments!");
 
-    QString outputFileName = argumentList[1];
+    outputFileName = argumentList[1];
     QString trainerAlgorithm = argumentList[2].toLower();
     int popNumber = argumentList[3].toInt();
     // 4 is density of the mass
+
+    (qobject_cast<MainWindow*>(sim->parent()->parent()->parent()))->setWindowTitle("Algoritmo " + trainerAlgorithm);
 
     qWarning() << "outputFileName: " << outputFileName << " trainerAlgorithm: " <<  trainerAlgorithm << " popNumber: " << popNumber;
 
@@ -230,7 +259,22 @@ void TrainerAlgoritmoGenetico::run() {
     float phi_g=1.49445;
     float omega=.729;
 #else
-    int number_runs=50;
+#ifdef SHORT_TEST_RUN
+    int number_runs=1;
+    //ga parms
+    int ga_pop=15;
+    int ga_iters=4;
+    //sh & sa parms
+    int sh_sa_iters=ga_pop*ga_iters;
+    int sh_sa_starts=5;
+    //pso parms
+    int pso_pop=20;
+    int pso_iters=100;
+    float phi_p=1.49445;
+    float phi_g=1.49445;
+    float omega=.729;
+#else
+    int number_runs=10;
     //ga parms
     int ga_pop=20;
     int ga_iters=100;
@@ -243,6 +287,7 @@ void TrainerAlgoritmoGenetico::run() {
     float phi_p=1.49445;
     float phi_g=1.49445;
     float omega=.729;
+#endif
 #endif
 #endif
 #endif
@@ -287,7 +332,7 @@ void TrainerAlgoritmoGenetico::run() {
 #endif
 
     // Save fuzzy
-    exportFuzzy(best_fuzzy, outputFileName + "_fuzzy.txt");
+    //Fuzzyficacion::exportFuzzy(best_fuzzy, outputFileName + "_fuzzy.txt");
 
     QApplication::exit(0);
 
@@ -296,24 +341,30 @@ void TrainerAlgoritmoGenetico::run() {
 float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
     static int count = 0;
     float result=0;
+#ifdef TEST_TUNING;
+    int moreTime = 100;
+#else
+    int moreTime = 0;
+#endif
     QTextStream out(&file);
 
     emit newFuzzy(b, setSpinBox);
 
 #ifdef SIMULATE_ESCENARIO_TRES_OBJETOS
     EscenarioTresObjetos e(this);
-    result += simulate(e, b, 40);
+    result += simulate(e, b, 40 + moreTime);
 #endif
 
 #ifdef SIMULATE_ESCENARIO_UNO_OBJETO
     EscenarioUnObjeto e2(this);
-    result += simulate(e2, b, 60);
+    result += simulate(e2, b, 60 + moreTime);
 #endif
 
     if(result > best_result) {
         best_result = result;
         best_fuzzy = b;
         emit bestFuzzy(b);
+        Fuzzyficacion::exportFuzzy(best_fuzzy, outputFileName + "_fuzzy.txt");
     }
     out << result << " " << best_result << "\n";
 //#ifdef PRINT_RESULT
@@ -361,23 +412,3 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
 
     return result;
 }
-
-void TrainerAlgoritmoGenetico::exportFuzzy(const fuzzy &f, QString fileName) {
-    QFile file(fileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-             return;
-
-    QTextStream out(&file);
-    for(int i=0; i<3; i++) {
-       for(int j=0; j<2; j++) {
-           out << f.input1[i][j] << "\n";
-       }
-    }
-    for(int i=0; i<3; i++) {
-       for(int j=0; j<2; j++) {
-           out << f.input2[i][j] << "\n";
-       }
-    }
-    file.close();
-}
-

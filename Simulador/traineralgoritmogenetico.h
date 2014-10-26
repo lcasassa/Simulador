@@ -22,7 +22,6 @@ public:
     float simulate(Escenario &e, fuzzy &b, double time);
     fuzzy best_fuzzy;
     float best_result;
-    void exportFuzzy(const fuzzy &f, QString file);
 
 
 protected:
@@ -33,6 +32,7 @@ public slots:
 
 private:
     QFile file;
+    QString outputFileName;
     
 };
 

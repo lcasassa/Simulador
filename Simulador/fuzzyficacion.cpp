@@ -334,3 +334,53 @@ void Fuzzyficacion::pintar(QPainter *p) {
     p->scale(1,1);
 }
 */
+
+#include <QFile>
+#include <QTextStream>
+void Fuzzyficacion::exportFuzzy(const fuzzy &f, QString fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+             return;
+
+    QTextStream out(&file);
+    for(int i=0; i<3; i++) {
+       for(int j=0; j<2; j++) {
+           out << f.input1[i][j] << "\n";
+       }
+    }
+    for(int i=0; i<3; i++) {
+       for(int j=0; j<2; j++) {
+           out << f.input2[i][j] << "\n";
+       }
+    }
+    file.close();
+}
+
+void Fuzzyficacion::importFuzzy(fuzzy &f, QString fileName) {
+    QFile file(fileName);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+             return;
+
+    QTextStream in(&file);
+    for(int i=0; i<3; i++) {
+       for(int j=0; j<2; j++) {
+           in >> f.input1[i][j];
+       }
+    }
+    for(int i=0; i<3; i++) {
+       for(int j=0; j<2; j++) {
+           in >> f.input2[i][j];
+       }
+    }
+
+    f.output[0][0] = -2.00;
+    f.output[0][1] =  0.00;
+    f.output[1][0] = -1.00;
+    f.output[1][1] =  0.00;
+    f.output[2][0] = -0.50;
+    f.output[2][1] =  0.50;
+    f.output[3][0] =  0.00;
+    f.output[3][1] =  1.00;
+
+    file.close();
+}
