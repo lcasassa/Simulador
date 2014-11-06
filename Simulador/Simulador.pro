@@ -12,9 +12,9 @@ TEMPLATE = app
 #QMAKE_CXXFLAGS += -O2
 #QMAKE_LFLAGS += -O2
 
-INCLUDEPATH += ../../fuzzylite/src/fuzzylite/
+INCLUDEPATH += ../../fuzzylite-3.0/src/fuzzylite/
 #LIBS += -L../../fuzzylite/ -lfuzzylite
-LIBS += -L../../fuzzylite/src/fuzzylite/lib/ -lfuzzylite-static
+LIBS += -L../../fuzzylite-3.0/src/fuzzylite/lib/ -lfuzzylite-static
 
 SOURCES += main.cpp\
     mainwindow.cpp \
@@ -78,8 +78,8 @@ unix: !mac: {
     #CONFIG += link_pkgconfig
     #PKGCONFIG += ode
     DEFINES += dDOUBLE
-    LIBS += -L../ode-0.12/ode/src -lode
-    INCLUDEPATH += ../ode-0.12/include
+    LIBS += -L../../ode-0.12/ode/src -lode
+    INCLUDEPATH += ../../ode-0.12/include
 
 }
 unix: mac: {
