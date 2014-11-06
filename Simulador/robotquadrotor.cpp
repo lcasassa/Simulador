@@ -11,6 +11,8 @@ bool RobotQuadrotor::key_right = false;
 bool RobotQuadrotor::key_clock = false;
 bool RobotQuadrotor::key_anticlock = false;
 
+#define USER_ACCELERATION_XY 0.01
+
 
 RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, float posicionInicialY_)
 {
@@ -44,6 +46,9 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
     prom = 0;
     promDistanceTotal = 0;
     sumg = 0;
+    maxg = 0;
+    iterations = 0;
+    crash = 0;
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -109,6 +114,9 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
     prom = 0;
     promDistanceTotal = 0;
     sumg = 0;
+    iterations = 0;
+    maxg = 0;
+    crash = 0;
 
     ObjetoFisico::init(world, space);
 }
@@ -135,13 +143,13 @@ void RobotQuadrotor::odeLoop() {
     //dBodyAddRelForce (body,  0.001, 0, 0);
 
     if(key_up)
-        dBodyAddRelForce (body,  0.3,  0.0, 0);
+        dBodyAddRelForce (body,  USER_ACCELERATION_XY,  0.0, 0);
     if(key_down)
-        dBodyAddRelForce (body, -0.3,  0.0, 0);
+        dBodyAddRelForce (body, -1*USER_ACCELERATION_XY,  0.0, 0);
     if(key_left)
-        dBodyAddRelForce (body,  0.0,  0.3, 0);
+        dBodyAddRelForce (body,  0.0,  USER_ACCELERATION_XY, 0);
     if(key_right)
-        dBodyAddRelForce (body,  0.0, -0.3, 0);
+        dBodyAddRelForce (body,  0.0, -1*USER_ACCELERATION_XY, 0);
     if(key_clock)
         dBodyAddTorque (body,  0.0, 0.0, -0.1);
     if(key_anticlock)
@@ -162,7 +170,13 @@ void RobotQuadrotor::odeLoop() {
             }
 
         control->loopControl(distancia_, vel_, out_);
-        dBodyAddRelForce (body, out_[0], out_[1], 0);
+        dBodyAddRelForce (body, out_[0]/20, out_[1]/20, 0);
+        const dReal *a = dBodyGetForce(body);
+        forceControl[0] = a[0];
+        forceControl[1] = a[1];
+        forceControl[2] = a[2];
+    } else {
+        dBodyAddRelForce (body, forceControl[0], forceControl[1], 0);
     }
 
     // Roce
@@ -187,11 +201,6 @@ void RobotQuadrotor::odeLoop() {
             sum += (double)distancia_old[i*4+j];
     promDistanceTotal = promDistanceTotal + (sum - promDistanceTotal)*0.2;
 
-    const dReal *a;
-    a = dBodyGetForce(body);
-
-    sumg += a[0] + a[1];
-
     //prom = prom + ( - prom)*0.2;
 
 
@@ -203,14 +212,50 @@ void RobotQuadrotor::odeLoop() {
             if(minDistance > (double)distancia_old[i*4+j])
                 minDistance = (double)distancia_old[i*4+j];
 
+    /*
+    const dReal *vel;
+    vel = dBodyGetLinearVel(body);
+    dReal acc[3];
+
+    acc[0] = vel[0] - vel_old[0];
+    vel_old[0] = vel[0];
+    acc[1] = vel[1] - vel_old[1];
+    vel_old[1] = vel[1];*/
+
+
+    const dReal *a = dBodyGetForce(body);
+    double va = sqrt(a[0]*a[0] + a[1]*a[1]);
+    //double va = sqrt(acc[0]*acc[0] + acc[1]*acc[1]);
+    if(va > maxg)
+        maxg = va;
+    sumg += va;
+    iterations += 1;
+
+}
+
+int RobotQuadrotor::crashCount() {
+    return crash;
 }
 
 double RobotQuadrotor::getSumG() {
-    return sumg;
+    double r = sumg/(iterations*USER_ACCELERATION_XY);
+    return r;
+}
+
+double RobotQuadrotor::getMaxG() {
+    double r = maxg/(USER_ACCELERATION_XY);
+    //qWarning("maxg %f sumg %f", r, sumg/(iterations*USER_ACCELERATION_XY));
+    /*
+    if(r > 1)
+        return 1;
+    else if(r<0)
+        return 0;
+*/
+    return r;
 }
 
 double RobotQuadrotor::getMinDistance() {
-    return minDistance; // radio of the circles
+    return minDistance/(5*radio); // radio of the circles
 }
 
 double RobotQuadrotor::getPromDistance() {
@@ -319,6 +364,10 @@ bool RobotQuadrotor::isGeom(dGeomID o1) {
 }
 
 bool RobotQuadrotor::odeCollide(dGeomID o1, dGeomID o2) {
+    if(isGeom(o1) || isGeom(o2)) {
+        crash += 1;
+    }
+
 /*    for(int i=0; i<4; i++) {
         if(objetoCircunferencia[i]->odeCollide(o1, o2)) return true;
     }*/

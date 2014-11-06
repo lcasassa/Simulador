@@ -43,6 +43,8 @@ private:
     fl::InputVariable* distancia;
     fl::InputVariable* vel;
     fl::OutputVariable* out;
+    double p;
+    double d;
 //    QList<AreaTriangular *> areaTriangular;
 };
 

@@ -29,13 +29,18 @@ public:
     double getMinDistance();
     double getPromDistance();
     double getSumG();
+    double getMaxG();
+    int crashCount();
 
 private:
+    dReal vel_old[3];
+    int iterations;
     double minDistance;
     double promDistance;
     double promDistanceTotal;
     double prom;
     double sumg;
+    double maxg;
     double elapsedTime_old;
     void pintarCirculo(QPainter *p, int i);
     bool isSensorInfrarrojo(dGeomID o1);
@@ -55,6 +60,8 @@ private:
     float posicionInicialX;
     float posicionInicialY;
     int loopControlCount;
+    dReal forceControl[3];
+    int crash;
 };
 
 #endif // ROBOTQUADROTOR_H

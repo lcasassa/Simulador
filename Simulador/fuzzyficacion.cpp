@@ -1,11 +1,13 @@
 #include "fuzzyficacion.h"
 #include <QDebug>
 
+//#define PID
+
 Fuzzyficacion::Fuzzyficacion(QObject *parent) :
     QObject(parent)
 {
-
-
+  p = 0;
+  d = 0;
 }
 
 /*
@@ -80,7 +82,8 @@ void Fuzzyficacion::setFuzzy(fuzzy &f) {
     f.output[3][0] =  0.00;
     f.output[3][1] =  1.00;
 */
-
+    p = f.input1[0][0];
+    d = f.input1[0][1];
     engine = new fl::Engine;
     engine->setName("simple-dimmer");
     engine->addHedge(new fl::Any);
@@ -285,6 +288,18 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
     if(distancia == NULL || vel == NULL || engine == NULL)
         return 0;
 
+#ifdef PID
+    float r = distancia_*p*10 + vel_*d*100;
+    if(r > 1) {
+        qWarning("muy grande %f", r);
+        return 1;
+    } else if(r < -2) {
+        qWarning("muy chico %f", r);
+        return -2;
+    } else
+        return r;
+#endif
+
     distancia->setInput(distancia_);
     vel->setInput(vel_);
     engine->process();
@@ -292,7 +307,14 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
     if(isnan(output))
         return 0;
     else
-        return output;
+        if(output > 1) {
+            qWarning("muy grande %f", output);
+            return 1;
+        } else if(output < -2) {
+            qWarning("muy chico %f", output);
+            return -2;
+        } else
+            return output;
 }
 
 Fuzzyficacion::~Fuzzyficacion() {

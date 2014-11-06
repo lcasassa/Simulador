@@ -376,7 +376,7 @@ float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
 }
 
 float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
-    float result=0;
+    double result=0;
 
     //qWarning("loop trainer..");
     //msleep(100);
@@ -399,7 +399,25 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
         //step(1000);
         //sleep(15);
         //    pause();
-        result = quad->getMinDistance();
+
+        double alfa = 0.01;
+        double beta = 0.25; // beta = 1 -> maxg inaceptable, beta = 0 -> sumg inaceptable
+
+        double maxg = quad->getMaxG()*(beta);
+        double sumg = quad->getSumG()*(1-beta);
+        //qWarning("maxg %f sumg %f", maxg, sumg);
+
+        result = (sumg + maxg) + quad->crashCount()*10 ;
+        //result = ;
+
+
+        result = 1 / (result);
+
+        //result *= alfa;
+
+        //result += quad->getMinDistance() * (1-alfa);
+        //result = quad->getMinDistance();
+        //qWarning("%f %f -> %f", quad->getMaxG(), quad->getMinDistance(), result);
     }
 
     desregistrarObjeto(quad);
