@@ -25,3 +25,6 @@ make
 2) Instalar fuzzylight 3.0
 
 https://code.google.com/p/fuzzylite/downloads/detail?name=fuzzylite-3.0-ubuntu64.zip&can=2&q=
+ver README
+cmake .
+make
