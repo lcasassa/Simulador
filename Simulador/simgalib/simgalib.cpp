@@ -286,20 +286,39 @@ void simgalib::Population::destroy()
     // empty the container
     pool.clear();
 }
-
+double initial2[] = {
+    0,
+    0.75,
+    0.25,
+    0.97,
+    0.84,
+    1,
+    0,//-1,
+    0,//3.46945e-18,
+    0.05,
+    0.5,
+    0.5,
+    1
+};
 void simgalib::Population::create()
 {
+    static bool first = true;
     // create population
     for (int i=0;i < population_size; i++)
         pool.push_back( new Organism(num_genes) );
 
+
     // initialize population
     for (int i = 0; i < population_size; i++)
     {
-        for (int j = 0; j < num_genes; j++)
-        {
-            (*pool[i]).genes.at(j)=flip(.5);
-        }
+        if(first) {
+            convertToGen(initial2, (*pool[i]), QUAD_FN_NUM_VARS, QUAD_FN_BITS_PER_VAR);
+            first = false;
+        } else
+            for (int j = 0; j < num_genes; j++)
+            {
+                (*pool[i]).genes.at(j)=flip(.5);
+            }
     }
 }
 
@@ -350,6 +369,31 @@ std::cout << flush;
 char temp2;
 std::cin.get(temp2);
 #endif
+
+void simgalib::convertToGen(double x[12], Organism &org, int num_vars, int bits_per_var) {
+    unsigned int uint_genes;
+    int one_to_shift;
+
+    double a_range[QUAD_FN_NUM_VARS] = {0,0,0,0,0,0,-1,-1,-1,-1,-1,-1};
+    double b_range[QUAD_FN_NUM_VARS] = {1,1,1,1,1,1, 1, 1, 1, 1, 1, 1};
+
+    for(int k=0; k<num_vars; k++) {
+        uint_genes=0;
+        one_to_shift=1;
+
+        uint_genes = (x[k] - a_range[k])/ ((b_range[k]-a_range[k])/(pow((double) 2.0, QUAD_FN_BITS_PER_VAR)-1));
+
+
+        for (int i=0;i<bits_per_var;i++)
+        {
+            org.genes.at((k*bits_per_var)+i) = ( uint_genes & one_to_shift ) ? 1:0;
+            one_to_shift=one_to_shift<<1;
+        }
+
+        // Convert the unsigned integer sum of the genes into floating point number x1
+
+    }
+}
 
 //-----------------------------------------------------------------------------
 // Optimization Methods
@@ -485,6 +529,7 @@ int simgalib::run_ga(EvalFN eval, int number_runs, int ga_pop_size, int ga_numbe
 
 int simgalib::run_sh(EvalFN eval, int number_runs, int sh_iterations, int sh_starts)
 {
+    static bool first = true;
     clock_t start,end,diff=0;
     start=clock();
 
@@ -512,7 +557,7 @@ int simgalib::run_sh(EvalFN eval, int number_runs, int sh_iterations, int sh_sta
 
     for (nRun=0; nRun < number_runs; nRun++)
     {
-
+        first = true;
         Organism stoch_org(eval.num_parms*eval.num_bits_per_parm);
         Organism best_stoch_org(eval.num_parms*eval.num_bits_per_parm);
 
@@ -522,9 +567,14 @@ int simgalib::run_sh(EvalFN eval, int number_runs, int sh_iterations, int sh_sta
         {
 
             // Initialize the starting point
-            for (int j = 0; j < stoch_org.num_genes; j++)
-            {
-                stoch_org.genes.at(j)=flip(.5);
+            if(first) {
+                convertToGen(initial2, stoch_org, QUAD_FN_NUM_VARS, QUAD_FN_BITS_PER_VAR);
+                first = false;
+            } else {
+                for (int j = 0; j < stoch_org.num_genes; j++)
+                {
+                    stoch_org.genes.at(j)=flip(.5);
+                }
             }
 
 
@@ -626,6 +676,7 @@ int simgalib::run_sh(EvalFN eval, int number_runs, int sh_iterations, int sh_sta
 
 int simgalib::run_sa(EvalFN eval, int number_runs, int sa_iterations, int sa_starts, double Kb, double nTempDelta)
 {
+    static bool first = true;
     clock_t start,end,diff=0;
     start=clock();
 
@@ -671,13 +722,20 @@ int simgalib::run_sa(EvalFN eval, int number_runs, int sa_iterations, int sa_sta
 
         nBestFitness=0;  // must initialize in every run
 
+        first = true;
+
         for (nRepetition=0; nRepetition < sa_starts;nRepetition++)
         {
 
             // Initialize the starting point
-            for (int j = 0; j < org.num_genes; j++)
-            {
-                org.genes.at(j)=flip(.5);
+            if(first) {
+                convertToGen(initial2, org, QUAD_FN_NUM_VARS, QUAD_FN_BITS_PER_VAR);
+                first = false;
+            } else {
+                for (int j = 0; j < org.num_genes; j++)
+                {
+                    org.genes.at(j)=flip(.5);
+                }
             }
 
             // Init temp to max value

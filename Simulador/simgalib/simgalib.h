@@ -57,15 +57,15 @@ namespace simgalib
 // Default simulation values here
 #define EVOLUTIONARY_MODEL 0         // default is Darwinian
 #define SELECTION_METHOD 0           // default is fitness proportional
-#define POPULATION_SIZE 100          // value recommended by De Jong (1975)
+#define POPULATION_SIZE 20          // value recommended by De Jong (1975)
 #define ELITE_FLAG 1
 #define ELITE_COUNT 1
 #define PCROSS 0.5                  // value recommended by De Jong (1975)
 #define PMUT 0.001                  // value recommended by De Jong (1975)
-#define NUM_GENES 8                // number of genes per organism by default
+#define NUM_GENES 12*20                // number of genes per organism by default
 #define NUM_ITERATIONS 100
-#define RANK_MIN 1.0
-#define RANK_MAX 1.1                // value recommended by Baker (1985)
+#define RANK_MIN 0
+#define RANK_MAX 1.5
 #define PTOURNAMENT 0.75            // value in Goldberg (1991)=0.5, M. Mitchell (1996)=0.75
 
 // Default simulation values here
@@ -351,6 +351,7 @@ namespace simgalib
         void evaluate_population_info(const Population * pop);
         void display_population_stats();
     };
+    void convertToGen(double x[12], Organism &org, int num_vars, int bits_per_var);
 
 
 

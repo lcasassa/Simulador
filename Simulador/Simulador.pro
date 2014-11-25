@@ -36,9 +36,11 @@ SOURCES += main.cpp\
     simgalib/simpsolib.cpp \
     simgalib/simtstlib.cpp \
     escenariotresobjetos.cpp \
+    escenariotresobjetoscerca.cpp \
     escenario.cpp \
     escenariounobjeto.cpp \
-    trainertestcontroller.cpp
+    trainertestcontroller.cpp \
+    escenariotest.cpp
 
 HEADERS  += mainwindow.h \
     simulador.h \
@@ -59,9 +61,11 @@ HEADERS  += mainwindow.h \
     simgalib/simpsolib.h \
     simgalib/simtstlib.h \
     escenariotresobjetos.h \
+    escenariotresobjetoscerca.h \
     escenario.h \
     escenariounobjeto.h \
-    trainertestcontroller.h
+    trainertestcontroller.h \
+    escenariotest.h
 
 FORMS    += mainwindow.ui
 

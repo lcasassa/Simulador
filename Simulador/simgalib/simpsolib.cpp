@@ -135,8 +135,24 @@ void simpsolib::Population::destroy()
     pool.clear();
 }
 
+double initial[] = {
+    0,
+    0.75,
+    0.25,
+    0.97,
+    0.84,
+    1,
+    0,//-1,
+    0,//3.46945e-18,
+    0.05,
+    0.5,
+    0.5,
+    1
+};
+
 void simpsolib::Population::create()
 {
+    static bool first = true;
     //Organism tmp_Org(num_dims);
     //float tmp_rand;
 
@@ -158,10 +174,17 @@ void simpsolib::Population::create()
 //            tmp_rand=random3();
 //            // TODO2: random debe partir de lower_range
 //            (*pool[i]).position[j]=tmp_rand*evaluator.upper_range[j];
-            (*pool[i]).position[j]=ran2((float)evaluator.lower_range[j],(float)evaluator.upper_range[j]);
+            if(first) {
+                (*pool[i]).position[j]=initial[j];
+            } else {
+                (*pool[i]).position[j]=ran2((float)evaluator.lower_range[j],(float)evaluator.upper_range[j]);
+            }
         }
-    }
+        if(first) {
+            first = false;
+        }
 
+    }
 }
 
 void simpsolib::Population::display()

@@ -11,7 +11,7 @@ bool RobotQuadrotor::key_right = false;
 bool RobotQuadrotor::key_clock = false;
 bool RobotQuadrotor::key_anticlock = false;
 
-#define USER_ACCELERATION_XY 0.01
+#define USER_ACCELERATION_XY 0.1
 
 
 RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, float posicionInicialY_)
@@ -171,12 +171,14 @@ void RobotQuadrotor::odeLoop() {
 
         control->loopControl(distancia_, vel_, out_);
         dBodyAddRelForce (body, out_[0]/20, out_[1]/20, 0);
-        const dReal *a = dBodyGetForce(body);
-        forceControl[0] = a[0];
-        forceControl[1] = a[1];
-        forceControl[2] = a[2];
+        const dReal * rotation = dBodyGetRotation(body);
+        forceControl[0] = out_[0]/20*rotation[0] - out_[1]/20*rotation[1];
+        forceControl[1] = -out_[0]/20*rotation[4] + out_[1]/20*rotation[5];
+        forceControl[2] = 0;
+
     } else {
-        dBodyAddRelForce (body, forceControl[0], forceControl[1], 0);
+        const dReal * rotation = dBodyGetRotation(body);
+        dBodyAddRelForce (body, forceControl[0]*rotation[0] + forceControl[1]*rotation[1], forceControl[0]*rotation[4] + forceControl[1]*rotation[5], forceControl[2]);
     }
 
     // Roce
@@ -238,12 +240,12 @@ int RobotQuadrotor::crashCount() {
 }
 
 double RobotQuadrotor::getSumG() {
-    double r = sumg/(iterations*USER_ACCELERATION_XY);
+    double r = sumg/(iterations*0.01);
     return r;
 }
 
 double RobotQuadrotor::getMaxG() {
-    double r = maxg/(USER_ACCELERATION_XY);
+    double r = maxg/(0.01);
     //qWarning("maxg %f sumg %f", r, sumg/(iterations*USER_ACCELERATION_XY));
     /*
     if(r > 1)
@@ -365,7 +367,20 @@ bool RobotQuadrotor::isGeom(dGeomID o1) {
 
 bool RobotQuadrotor::odeCollide(dGeomID o1, dGeomID o2) {
     if(isGeom(o1) || isGeom(o2)) {
-        crash += 1;
+
+        dContact contact;
+        contact.surface.mode = dContactBounce | dContactSoftCFM;
+        // friction parameter
+        contact.surface.mu = dInfinity;
+        // bounce is the amount of "bouncyness".
+        contact.surface.bounce = 0.9;
+        // bounce_vel is the minimum incoming velocity to cause a bounce
+        contact.surface.bounce_vel = 0.1;
+        // constraint force mixing parameter
+        contact.surface.soft_cfm = 0.001;
+        if (int numc = dCollide (o1,o2,1,&contact.geom,sizeof(dContact))) {
+            crash += 1;
+        }
     }
 
 /*    for(int i=0; i<4; i++) {

@@ -28,7 +28,7 @@ namespace simtstlib
 // ***********************************************************************
 // A quattro copter test function, with one var of 32 bits and a max val of 13.8526 in the range -3 to +3
 #define QUAD_FN_NUM_VARS 12
-#define QUAD_FN_BITS_PER_VAR 8
+#define QUAD_FN_BITS_PER_VAR 20
 #define QUAD_FN_LOWER_RANGE_1 0
 #define QUAD_FN_UPPER_RANGE_1 1.0
 #define QUAD_FN_LOWER_RANGE_2 -1.0

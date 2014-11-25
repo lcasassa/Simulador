@@ -82,8 +82,8 @@ void Fuzzyficacion::setFuzzy(fuzzy &f) {
     f.output[3][0] =  0.00;
     f.output[3][1] =  1.00;
 */
-    p = f.input1[0][0];
-    d = f.input1[0][1];
+    p = f.input2[0][0];
+    d = f.input2[0][1];
     engine = new fl::Engine;
     engine->setName("simple-dimmer");
     engine->addHedge(new fl::Any);
@@ -291,10 +291,10 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
 #ifdef PID
     float r = distancia_*p*10 + vel_*d*100;
     if(r > 1) {
-        qWarning("muy grande %f", r);
+        //qWarning("muy grande %f", r);
         return 1;
     } else if(r < -2) {
-        qWarning("muy chico %f", r);
+        //qWarning("muy chico %f", r);
         return -2;
     } else
         return r;
@@ -308,10 +308,10 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
         return 0;
     else
         if(output > 1) {
-            qWarning("muy grande %f", output);
+            //qWarning("muy grande %f", output);
             return 1;
         } else if(output < -2) {
-            qWarning("muy chico %f", output);
+            //qWarning("muy chico %f", output);
             return -2;
         } else
             return output;
@@ -375,6 +375,12 @@ void Fuzzyficacion::exportFuzzy(const fuzzy &f, QString fileName) {
            out << f.input2[i][j] << "\n";
        }
     }
+
+    for(int i=0; i<4; i++) {
+       for(int j=0; j<2; j++) {
+           out << f.output[i][j] << "\n";
+       }
+    }
     file.close();
 }
 
@@ -394,15 +400,11 @@ void Fuzzyficacion::importFuzzy(fuzzy &f, QString fileName) {
            in >> f.input2[i][j];
        }
     }
-
-    f.output[0][0] = -2.00;
-    f.output[0][1] =  0.00;
-    f.output[1][0] = -1.00;
-    f.output[1][1] =  0.00;
-    f.output[2][0] = -0.50;
-    f.output[2][1] =  0.50;
-    f.output[3][0] =  0.00;
-    f.output[3][1] =  1.00;
+    for(int i=0; i<4; i++) {
+       for(int j=0; j<2; j++) {
+           in >> f.output[i][j];
+       }
+    }
 
     file.close();
 }

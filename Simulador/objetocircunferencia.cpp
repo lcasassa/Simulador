@@ -1,6 +1,6 @@
 #include "objetocircunferencia.h"
 
-ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce_, float posicionInicialX_, float posicionInicialY_, float posicionInicialZ_)
+ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce_, float posicionInicialX_, float posicionInicialY_, float posicionInicialZ_, float(*xForce_)(float), float(*yForce_)(float))
 {
     radio = radio_;
     masa = masa_;
@@ -9,6 +9,8 @@ ObjetoCircunferencia::ObjetoCircunferencia(float radio_, float masa_, float roce
     posicionInicialY = posicionInicialY_;
     posicionInicialZ = posicionInicialZ_;
     tiempo = 0;
+    xForce = xForce_;
+    yForce = yForce_;
     //qWarning("init ObjetoCircunferencia");
 }
 
@@ -17,6 +19,7 @@ ObjetoCircunferencia::~ObjetoCircunferencia() {
 }
 
 void ObjetoCircunferencia::init(dWorldID *world, dSpaceID *space) {
+    tiempo = 0;
     // create object
     body = dBodyCreate (*world);
     geom = dCreateSphere (*space,radio);
@@ -69,7 +72,11 @@ void ObjetoCircunferencia::pintar(QPainter *p) {
 void ObjetoCircunferencia::odeLoop() {
     const dReal *v,*w;
 
-    dBodyAddForce (body, 10*cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, 10*sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, 0);
+    if(xForce != NULL && yForce != NULL)
+        dBodyAddForce (body, xForce(tiempo), yForce(tiempo), 0);
+    else
+        dBodyAddForce (body, 10*cos((float)((int)tiempo%(2*3141))/1000.0)*0.003, 10*sin((float)((int)tiempo%(2*3141))/1000.0)*0.01, 0);
+
     tiempo += 2.5;
     // Roce
     v = dBodyGetLinearVel(body);

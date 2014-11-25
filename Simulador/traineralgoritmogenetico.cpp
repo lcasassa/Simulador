@@ -3,7 +3,9 @@
 #include "objetocircunferencia.h"
 #include "simulador.h"
 #include "escenariotresobjetos.h"
+#include "escenariotresobjetoscerca.h"
 #include "escenariounobjeto.h"
+#include "escenariotest.h"
 #include <QPointer>
 #include <QFile>
 #include <QTextStream>
@@ -23,12 +25,14 @@
 //#define ONE_SHORT_RUN
 //#define SHORT_TEST_RUN
 
-#define SIMULATE_ESCENARIO_TRES_OBJETOS
-#define SIMULATE_ESCENARIO_UNO_OBJETO
+//#define SIMULATE_ESCENARIO_TRES_OBJETOS
+//#define SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
+//#define SIMULATE_ESCENARIO_UNO_OBJETO
+#define SIMULATE_ESCENARIO_MUCHOS_ESCENARIOS
 
-//#define TEST_TUNING
+#define TEST_TUNING
 //#define MANUAL_TUNING
-#define AUTO_TUNING
+//#define AUTO_TUNING
 
 
 using namespace simgalib;
@@ -132,7 +136,7 @@ void TrainerAlgoritmoGenetico::run() {
 
 
     Ui::MainWindow *ui = sim->getUI();
-    ui->spinBoxLoopSleepUs->setValue(350);
+    ui->spinBoxLoopSleepUs->setValue(0);
     (qobject_cast<MainWindow*>(sim->parent()->parent()->parent()))->setWindowTitle("Fuzzy " + argumentList[1]);
 
     file.setFileName("outputTest.txt");
@@ -307,7 +311,7 @@ void TrainerAlgoritmoGenetico::run() {
 
     for (int i=0; i< QUAD_FN_NUM_VARS; i++)
     {
-        if(i > QUAD_FN_NUM_VARS/2) {
+        if(i >= QUAD_FN_NUM_VARS/2) {
             lower_range[i]=QUAD_FN_LOWER_RANGE_2;
             upper_range[i]=QUAD_FN_UPPER_RANGE_2;
         } else {
@@ -341,6 +345,7 @@ void TrainerAlgoritmoGenetico::run() {
 float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
     static int count = 0;
     float result=0;
+    float result_tmp=0;
 #ifdef TEST_TUNING;
     int moreTime = 100;
 #else
@@ -355,9 +360,44 @@ float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
     result += simulate(e, b, 40 + moreTime);
 #endif
 
+#ifdef SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
+    EscenarioTresObjetosCerca e2(this);
+    result_tmp = simulate(e2, b, 90 + moreTime);
+    result_tmp *= 3;
+    result += result_tmp;
+#endif
+
 #ifdef SIMULATE_ESCENARIO_UNO_OBJETO
-    EscenarioUnObjeto e2(this);
-    result += simulate(e2, b, 60 + moreTime);
+    EscenarioUnObjeto e3(this);
+    result += simulate(e3, b, 60 + moreTime);
+#endif
+
+#ifdef SIMULATE_ESCENARIO_MUCHOS_ESCENARIOS
+    EscenarioTest e4(this);
+    result_tmp = simulate(e4, b, 60 + moreTime);
+    if(result_tmp == 0)
+        qWarning("Choque EscenarioTest");
+    result += result_tmp;
+    EscenarioTest5 e8(this);
+    result_tmp = simulate(e8, b, 60 + moreTime);
+    if(result_tmp == 0)
+        qWarning("Choque EscenarioTest5");
+    result += result_tmp;
+    EscenarioTest4 e7(this);
+    result_tmp = simulate(e7, b, 60 + moreTime);
+    if(result_tmp == 0)
+        qWarning("Choque EscenarioTest4");
+    result += result_tmp;
+    EscenarioTest3 e6(this);
+    result_tmp = simulate(e6, b, 60 + moreTime);
+    if(result_tmp == 0)
+        qWarning("Choque EscenarioTest3");
+    result += result_tmp;
+    EscenarioTest2 e5(this);
+    result_tmp = simulate(e5, b, 60 + moreTime);
+    if(result_tmp == 0)
+        qWarning("Choque EscenarioTest2");
+    result += result_tmp;
 #endif
 
     if(result > best_result) {
@@ -400,22 +440,28 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
         //sleep(15);
         //    pause();
 
-        double alfa = 0.01;
+        // alfa = 0.5 == muy dominante la aceleracion
+
+        double alfa = 0.5;
         double beta = 0.25; // beta = 1 -> maxg inaceptable, beta = 0 -> sumg inaceptable
 
         double maxg = quad->getMaxG()*(beta);
-        double sumg = quad->getSumG()*(1-beta);
+        double sumg = quad->getSumG()*(1.0-beta);
         //qWarning("maxg %f sumg %f", maxg, sumg);
 
-        result = (sumg + maxg) + quad->crashCount()*10 ;
+        result = (sumg + maxg);
         //result = ;
 
 
         result = 1 / (result);
 
-        //result *= alfa;
+        result *= alfa;
 
-        //result += quad->getMinDistance() * (1-alfa);
+        result += quad->getMinDistance() * (1.0-alfa);
+        int crash = quad->crashCount();
+        double mindist = quad->getMinDistance();
+        if(crash > 0 || 0.001 >= mindist)
+            result = 0;
         //result = quad->getMinDistance();
         //qWarning("%f %f -> %f", quad->getMaxG(), quad->getMinDistance(), result);
     }
