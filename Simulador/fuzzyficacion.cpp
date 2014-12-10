@@ -289,7 +289,7 @@ float Fuzzyficacion::fuzzyfica(float distancia_, float vel_) {
         return 0;
 
 #ifdef PID
-    float r = distancia_*p*10 + vel_*d*100;
+    float r = (distancia_ - 1)*p*2 + vel_*d*50;
     if(r > 1) {
         //qWarning("muy grande %f", r);
         return 1;

@@ -45,10 +45,13 @@ RobotQuadrotor::RobotQuadrotor(ControlFuzzy *control_, float posicionInicialX_, 
 
     prom = 0;
     promDistanceTotal = 0;
+    promMinDistanceTotal = 0;
     sumg = 0;
     maxg = 0;
     iterations = 0;
     crash = 0;
+    objectDetectedOld = false;
+    objectDetectedCount = 0;
 }
 
 RobotQuadrotor::~RobotQuadrotor() {
@@ -111,12 +114,16 @@ void RobotQuadrotor::init(dWorldID *world, dSpaceID *space) {
         dGeomSetOffsetRotation( sensorInfrarrojo[3][j]->geom, R );
     }
 
+    minDistance = radio*5;
     prom = 0;
     promDistanceTotal = 0;
+    promMinDistanceTotal = 0;
     sumg = 0;
     iterations = 0;
     maxg = 0;
     crash = 0;
+    objectDetectedOld = false;
+    objectDetectedCount = 0;
 
     ObjetoFisico::init(world, space);
 }
@@ -201,7 +208,7 @@ void RobotQuadrotor::odeLoop() {
     for(int i=0; i<4; i++)
         for(int j=0; j<4; j++)
             sum += (double)distancia_old[i*4+j];
-    promDistanceTotal = promDistanceTotal + (sum - promDistanceTotal)*0.2;
+    promDistanceTotal += sum;
 
     //prom = prom + ( - prom)*0.2;
 
@@ -209,11 +216,24 @@ void RobotQuadrotor::odeLoop() {
     //if(distance < 1e-10)
     //    return true;
 
+    bool objectDetected = false;
+    double minDistance_tmp = 1;
     for(int i=0; i<4; i++)
-        for(int j=0; j<4; j++)
+        for(int j=0; j<4; j++) {
+            if(minDistance_tmp > (double)distancia_old[i*4+j])
+                minDistance_tmp = (double)distancia_old[i*4+j];
             if(minDistance > (double)distancia_old[i*4+j])
                 minDistance = (double)distancia_old[i*4+j];
+            if(distancia_old[i*4+j] != 1)
+                objectDetected = true;
+        }
 
+    promMinDistanceTotal += minDistance_tmp;
+
+    if(!objectDetectedOld && objectDetected)
+        objectDetectedCount++;
+
+    objectDetectedOld = objectDetected;
     /*
     const dReal *vel;
     vel = dBodyGetLinearVel(body);
@@ -239,6 +259,10 @@ int RobotQuadrotor::crashCount() {
     return crash;
 }
 
+int RobotQuadrotor::getObjectDetectedCount() {
+    return objectDetectedCount;
+}
+
 double RobotQuadrotor::getSumG() {
     double r = sumg/(iterations*0.01);
     return r;
@@ -257,7 +281,11 @@ double RobotQuadrotor::getMaxG() {
 }
 
 double RobotQuadrotor::getMinDistance() {
-    return minDistance/(5*radio); // radio of the circles
+    return minDistance/(1); // radio of the circles
+}
+
+double RobotQuadrotor::getPromMinDistance() {
+    return promMinDistanceTotal/(iterations*1); // radio of the circles
 }
 
 double RobotQuadrotor::getPromDistance() {
@@ -271,7 +299,7 @@ double RobotQuadrotor::getPromDistance() {
     return prom / (4.0*4.0);
     */
 
-    return promDistanceTotal;
+    return promDistanceTotal/(16*iterations*1);
 
     //return promDistance - 0.3; // radio of the circles
 }

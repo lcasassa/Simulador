@@ -28,16 +28,21 @@ public:
     static bool key_anticlock;
     double getMinDistance();
     double getPromDistance();
+    double getPromMinDistance();
     double getSumG();
     double getMaxG();
     int crashCount();
+    int getObjectDetectedCount();
 
 private:
     dReal vel_old[3];
     int iterations;
+    bool objectDetectedOld;
+    int objectDetectedCount;
     double minDistance;
     double promDistance;
     double promDistanceTotal;
+    double promMinDistanceTotal;
     double prom;
     double sumg;
     double maxg;

@@ -25,15 +25,22 @@
 //#define ONE_SHORT_RUN
 //#define SHORT_TEST_RUN
 
-//#define SIMULATE_ESCENARIO_TRES_OBJETOS
-//#define SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
-//#define SIMULATE_ESCENARIO_UNO_OBJETO
-#define SIMULATE_ESCENARIO_MUCHOS_ESCENARIOS
 
-#define TEST_TUNING
+//#define TEST_TUNING
 //#define MANUAL_TUNING
-//#define AUTO_TUNING
+#define AUTO_TUNING
 
+#ifdef AUTO_TUNING
+  #define SIMULATE_ESCENARIO_TRES_OBJETOS
+  #define SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
+  #define SIMULATE_ESCENARIO_UNO_OBJETO
+  #define SIMULATE_ESCENARIO_TRES_OBJETOS_DISTINTOS
+#else
+  #define SIMULATE_ESCENARIO_MUCHOS_ESCENARIOS
+  //#define SIMULATE_ESCENARIO_TRES_OBJETOS
+  //#define SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
+  //#define SIMULATE_ESCENARIO_UNO_OBJETO
+#endif
 
 using namespace simgalib;
 using namespace simpsolib;
@@ -344,6 +351,7 @@ void TrainerAlgoritmoGenetico::run() {
 
 float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
     static int count = 0;
+    int sim_count=0;
     float result=0;
     float result_tmp=0;
 #ifdef TEST_TUNING;
@@ -353,52 +361,78 @@ float TrainerAlgoritmoGenetico::doSimulation(fuzzy &b, bool setSpinBox) {
 #endif
     QTextStream out(&file);
 
+    //b.input1[0][0] = 0.0;
+    //b.input2[0][0] = -1.0;
+    //b.input2[0][1] = 0.0;
+
     emit newFuzzy(b, setSpinBox);
 
 #ifdef SIMULATE_ESCENARIO_TRES_OBJETOS
+    sim_count++;
     EscenarioTresObjetos e(this);
-    result += simulate(e, b, 40 + moreTime);
+    result += simulate(e, b, 60 + moreTime);
 #endif
 
 #ifdef SIMULATE_ESCENARIO_TRES_OBJETOS_CERCA
+    sim_count++;
     EscenarioTresObjetosCerca e2(this);
-    result_tmp = simulate(e2, b, 90 + moreTime);
-    result_tmp *= 3;
-    result += result_tmp;
+    result += simulate(e2, b, 90 + moreTime);
 #endif
 
 #ifdef SIMULATE_ESCENARIO_UNO_OBJETO
+    sim_count++;
     EscenarioUnObjeto e3(this);
     result += simulate(e3, b, 60 + moreTime);
 #endif
 
+#ifdef SIMULATE_ESCENARIO_TRES_OBJETOS_DISTINTOS
+    sim_count++;
+    EscenarioTest e9(this);
+    result += simulate(e9, b, 60 + moreTime);
+#endif
+
 #ifdef SIMULATE_ESCENARIO_MUCHOS_ESCENARIOS
+    /*
+    sim_count++;
     EscenarioTest e4(this);
     result_tmp = simulate(e4, b, 60 + moreTime);
     if(result_tmp == 0)
         qWarning("Choque EscenarioTest");
     result += result_tmp;
+    */
+
+    sim_count++;
     EscenarioTest5 e8(this);
     result_tmp = simulate(e8, b, 60 + moreTime);
     if(result_tmp == 0)
         qWarning("Choque EscenarioTest5");
     result += result_tmp;
+
+    sim_count++;
     EscenarioTest4 e7(this);
     result_tmp = simulate(e7, b, 60 + moreTime);
     if(result_tmp == 0)
         qWarning("Choque EscenarioTest4");
     result += result_tmp;
+
+    sim_count++;
     EscenarioTest3 e6(this);
     result_tmp = simulate(e6, b, 60 + moreTime);
     if(result_tmp == 0)
         qWarning("Choque EscenarioTest3");
     result += result_tmp;
+
+    sim_count++;
     EscenarioTest2 e5(this);
     result_tmp = simulate(e5, b, 60 + moreTime);
     if(result_tmp == 0)
         qWarning("Choque EscenarioTest2");
     result += result_tmp;
 #endif
+
+    //qWarning("%f = %f / %f", result / (double)sim_count, result, (double)sim_count);
+
+    result /= (double)sim_count;
 
     if(result > best_result) {
         best_result = result;
@@ -435,7 +469,31 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
 
     play(time);
     if(sim != NULL && sim->odeRunning()) {
+        static double alfa = 0.5;
 
+        int crash = quad->crashCount();
+        if(crash == 0) {
+            int objectDetected = quad->getObjectDetectedCount();
+            objectDetected -= 2;
+            if(objectDetected < 0)
+                objectDetected = 0;
+            double objectDetectedFitness = (10.0 - (double)objectDetected)/10.0;
+            double minDist = quad->getMinDistance();
+            double promDist = quad->getPromDistance();
+            double promMinDist = quad->getPromMinDistance();
+            double maxg = quad->getMaxG();
+            double sumg = quad->getSumG();
+
+            double minimizar = maxg*0.75 + sumg*0.25;
+            double maximizar = (minDist + promDist + promMinDist) / 3.0;
+
+            result = (maximizar*alfa + (1 - minimizar/100)*(1-alfa) + objectDetectedFitness)/2.0;
+            //qWarning("Result: %f = %f*%f + %f*%f", result, maximizar, alfa, 1 - minimizar/100, 1-alfa);
+        } else
+            result = 0;
+
+
+        /*
         //step(1000);
         //sleep(15);
         //    pause();
@@ -450,10 +508,9 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
         //qWarning("maxg %f sumg %f", maxg, sumg);
 
         result = (sumg + maxg);
-        //result = ;
-
-
-        result = 1 / (result);
+        result *= 1.0/50.0;
+        result = 1 - (result);
+        if(1.2 < result) result = 1.2;
 
         result *= alfa;
 
@@ -464,6 +521,7 @@ float TrainerAlgoritmoGenetico::simulate(Escenario &e, fuzzy &b, double time) {
             result = 0;
         //result = quad->getMinDistance();
         //qWarning("%f %f -> %f", quad->getMaxG(), quad->getMinDistance(), result);
+        */
     }
 
     desregistrarObjeto(quad);
